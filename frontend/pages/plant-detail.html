@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlantID</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+    <div class="logout">
+        <button class="logout-btn">Logout</button>
+    </div>
+    <nav>
+        <ul>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="kalendar.html">Kalendar</a></li>
+            <li><a href="settings.html">Settings</a></li>
+        </ul>
+    </nav>
+    <div class="plant-detail-container">
+        <div class="left-section">
+            <h2>Plant Details</h2>
+            
+            <table class="plant-info-table">
+                <tr>
+                    <th>ID</th>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <th>Name</th>
+                    <td>Fern</td>
+                </tr>
+                <tr>
+                    <th>Species</th>
+                    <td>Nephrolepis exaltata</td>
+                </tr>
+                <tr>
+                    <th>Age</th>
+                    <td>2 years</td>
+                </tr>
+                <tr>
+                    <th>Last Watered</th>
+                    <td>2025-02-25</td>
+                </tr>
+                <tr>
+                    <th>Next Event</th>
+                    <td>Watering</td>
+                </tr>
+            </table>
+
+            <h3>Event Log</h3>
+            <table class="event-log-table">
+                <tr>
+                    <th>Date</th>
+                    <th>Event</th>
+                </tr>
+                <tr>
+                    <td>2025-02-25</td>
+                    <td>Watered</td>
+                </tr>
+                <tr>
+                    <td>2025-02-20</td>
+                    <td>Pruned</td>
+                </tr>
+                <tr>
+                    <td>2025-02-18</td>
+                    <td>Fertilized</td>
+                </tr>
+            </table>
+        </div>
+        <div class="right-section">
+            <div class="image-gallery">
+                <img src="../assets/images/placeholder.png" alt="Plant Image 1" class="gallery-image">
+                <img src="../assets/images/placeholder.png" alt="Plant Image 2" class="gallery-image">
+                <img src="../assets/images/placeholder.png" alt="Plant Image 3" class="gallery-image">
+            </div>
+            <button class="add-image-btn" onclick="addNewImage()">Add New Picture</button>
+        </div>
+    </div>
+</body>
+</html>
