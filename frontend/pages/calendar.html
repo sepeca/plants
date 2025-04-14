@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="../assets/js/notifications.js"></script>
+</head>
+<body>
+    <div class="logout">
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+    <nav></nav>
+    <div class="calendar-container">
+        <button id="finish-tasks-btn" class="settings-btn" style="margin-bottom: 10px;">Finish Selected Tasks</button>
+        <table id="plant-tasks" class="display">
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>Task Date</th>
+                    <th>Plant Name</th>
+                    <th>Type</th>
+                    <th>Location</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will be dynamically loaded via DataTables -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal for viewing more details -->
+    <div id="task-details-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Task Details</h2>
+            <p id="task-details"></p>
+            <img id="plant-image" src="" alt="Plant Image" />
+        </div>
+    </div>
+
+    <script>
+        function logout() {
+            document.cookie = 'authToken=; max-age=0; path=/'; // Clear auth token
+            document.cookie = 'username=; max-age=0; path=/'; // Clear username
+            document.cookie = 'role=; max-age=0; path=/'; // Clear role
+            window.location.href = '/pages/login.html';
+        }
+
+        $(document).ready(function () {
+            const table = $('#plant-tasks').DataTable({
+                ajax: {
+                    url: '/api/get-tasks',
+                    dataSrc: '',
+                    data: function (d) {
+                        // Add user role to the request
+                        d.role = getUserRole();
+                        d.status = 'unfinished'; // Only fetch unfinished tasks
+                    }
+                },
+                columns: [
+                    {
+                        data: null,
+                        render: function (data, type, row) {
+                            return `<input type="checkbox" class="task-select" data-id="${row.id}">`;
+                        },
+                        orderable: false
+                    },
+                    { data: 'taskDate' },
+                    { data: 'plantName' },
+                    { data: 'type' },
+                    { data: 'location' },
+                    {
+                        data: null,
+                        render: function (data, type, row) {
+                            return `<button class="details-btn" data-id="${row.id}">Details</button>`;
+                        }
+                    }
+                ],
+                pageLength: 15,
+                scrollY: '400px',
+                scrollCollapse: true,
+                scroller: true
+            });
+
+            // Handle row click for additional details
+            $('#plant-tasks tbody').on('click', '.details-btn', function () {
+                const rowId = $(this).data('id');
+                fetch(`/api/get-task-details?id=${rowId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        $('#task-details').text(`
+                            ID: ${data.id}
+                            Last Finished Event: ${data.lastEvent}
+                            Caretaker: ${data.caretaker}
+                        `);
+                        $('#plant-image').attr('src', data.photoUrl);
+                        $('#task-details-modal').show();
+                    })
+                    .catch(error => console.error('Error fetching task details:', error));
+            });
+
+            // Close modal
+            $('.close-btn').on('click', function () {
+                $('#task-details-modal').hide();
+            });
+
+            // Handle finishing selected tasks
+            $('#finish-tasks-btn').on('click', function () {
+                const selectedTasks = [];
+                $('.task-select:checked').each(function () {
+                    selectedTasks.push($(this).data('id'));
+                });
+
+                if (selectedTasks.length === 0) {
+                    alert('No tasks selected.');
+                    return;
+                }
+
+                fetch('/api/finish-tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ taskIds: selectedTasks })
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('Tasks marked as finished.');
+                            table.ajax.reload(); // Reload table data
+                        } else {
+                            alert('Failed to finish tasks. Please try again.');
+                        }
+                    })
+                    .catch(error => console.error('Error finishing tasks:', error));
+            });
+
+            function getUserRole() {
+                // Fetch user role from the server or cookie
+                return document.cookie.includes('role=admin') ? 'admin' : 'user';
+            }
+        });
+    </script>
+</body>
+</html>

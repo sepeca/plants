@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Users</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="../assets/js/notifications.js"></script>
+</head>
+<body>
+    <div class="logout">
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+    <nav></nav>
+    <div class="add-user-container">
+        <h2>Add New Users</h2>
+        <form id="add-user-form">
+            <table>
+                <tr>
+                    <td><label for="username">Username:</label></td>
+                    <td><input type="text" id="username" name="username" required></td>
+                </tr>
+                <tr>
+                    <td><label for="email">Email:</label></td>
+                    <td><input type="email" id="email" name="email" required></td>
+                </tr>
+                <tr>
+                    <td><label for="password">Password (optional):</label></td>
+                    <td><input type="text" id="password" name="password"></td>
+                </tr>
+                <tr>
+                    <td><label for="is-admin">Make Admin:</label></td>
+                    <td><input type="checkbox" id="is-admin" name="is-admin"></td>
+                </tr>
+            </table>
+            <button type="submit" class="settings-btn">Add User</button>
+        </form>
+        <button id="delete-selected-users-btn" class="settings-btn" style="margin-top: 10px;">Delete Selected Users</button>
+        <h3>Existing Users</h3>
+        <table id="user-table" class="display">
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will be dynamically loaded via DataTables -->
+            </tbody>
+        </table>
+    </div>
+    <script>
+        function logout() {
+            document.cookie = 'authToken=; max-age=0; path=/'; // Clear auth token
+            document.cookie = 'username=; max-age=0; path=/'; // Clear username
+            document.cookie = 'role=; max-age=0; path=/'; // Clear role
+            window.location.href = '/pages/login.html';
+        }
+
+        $(document).ready(function () {
+            const table = $('#user-table').DataTable({
+                ajax: {
+                    url: '/api/get-users',
+                    dataSrc: ''
+                },
+                columns: [
+                    {
+                        data: null,
+                        render: function (data, type, row) {
+                            return `<input type="checkbox" class="user-select" data-id="${row.id}">`;
+                        },
+                        orderable: false
+                    },
+                    { data: 'username' },
+                    { data: 'email' },
+                    {
+                        data: 'isAdmin',
+                        render: function (data) {
+                            return data ? 'Admin' : 'User';
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (data, type, row) {
+                            const toggleAdminButton = `
+                                <button class="toggle-admin-btn" data-id="${row.id}" data-is-admin="${row.isAdmin}">
+                                    ${row.isAdmin ? 'Revoke Admin' : 'Make Admin'}
+                                </button>`;
+                            const deleteButton = row.isAdmin
+                                ? '' // Do not show delete button for admins
+                                : `<button class="delete-btn" data-id="${row.id}">Delete</button>`;
+                            return `${toggleAdminButton} ${deleteButton}`;
+                        }
+                    }
+                ],
+                pageLength: 10,
+                scrollY: '400px',
+                scrollCollapse: true,
+                scroller: true
+            });
+
+            $('#add-user-form').on('submit', async function (event) {
+                event.preventDefault();
+                const username = $('#username').val();
+                const email = $('#email').val();
+                let password = $('#password').val();
+                const isAdmin = $('#is-admin').is(':checked');
+
+                if (!password) {
+                    password = generatePassword();
+                }
+
+                try {
+                    const response = await fetch('/api/add-user', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, email, password, isAdmin })
+                    });
+
+                    if (response.ok) {
+                        alert('User added successfully.');
+                        $('#add-user-form')[0].reset();
+                        table.ajax.reload(); // Reload table data
+                    } else {
+                        alert('Failed to add user. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error adding user:', error);
+                    alert('An error occurred. Please try again later.');
+                }
+            });
+
+            $('#delete-selected-users-btn').on('click', async function () {
+                const selectedUsers = [];
+                $('.user-select:checked').each(function () {
+                    selectedUsers.push($(this).data('id'));
+                });
+
+                if (selectedUsers.length === 0) {
+                    alert('No users selected.');
+                    return;
+                }
+
+                if (!confirm('Are you sure you want to delete the selected users? This action cannot be undone.')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/delete-users', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userIds: selectedUsers })
+                    });
+
+                    if (response.ok) {
+                        alert('Selected users deleted successfully.');
+                        table.ajax.reload(); // Reload table data
+                    } else {
+                        alert('Failed to delete users. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error deleting users:', error);
+                    alert('An error occurred. Please try again later.');
+                }
+            });
+
+            $('#user-table').on('click', '.toggle-admin-btn', async function () {
+                const userId = $(this).data('id');
+                const isAdmin = $(this).data('is-admin');
+                try {
+                    const response = await fetch('/api/toggle-admin', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId, isAdmin: !isAdmin })
+                    });
+
+                    if (response.ok) {
+                        alert('User role updated successfully.');
+                        table.ajax.reload(); // Reload table data
+                    } else {
+                        alert('Failed to update user role. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error updating user role:', error);
+                    alert('An error occurred. Please try again later.');
+                }
+            });
+
+            function generatePassword() {
+                return Math.random().toString(36).slice(-8);
+            }
+        });
+    </script>
+</body>
+</html>

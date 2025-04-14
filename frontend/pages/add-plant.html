@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Plant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .form-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-container form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .form-container input, .form-container button {
+            padding: 10px;
+            font-size: 1em;
+        }
+        .form-container button {
+            background-color: #6a994e;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .form-container button:hover {
+            background-color: #5c8a42;
+        }
+        .logout {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        .logout-btn {
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+        .logout-btn:hover {
+            background-color: #c9302c;
+        }
+    </style>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="../assets/js/notifications.js"></script>
+</head>
+<body>
+    <div class="logout">
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+    <nav></nav>
+    <div class="form-container">
+        <h2>Add New Plant</h2>
+        <form action="/add-plant" method="POST">
+            <label for="plant-name">Plant Name:</label>
+            <input type="text" id="plant-name" name="plant-name" required>
+            
+            <label for="species">Species:</label>
+            <input type="text" id="species" name="species" required>
+            
+            <label for="room">Room:</label>
+            <input type="text" id="room" name="room" required>
+            
+            <label for="task">Task Description:</label>
+            <input type="text" id="task" name="task" required>
+            
+            <label for="date">Task Date:</label>
+            <input type="date" id="date" name="date" required>
+            
+            <label for="time">Task Time:</label>
+            <input type="time" id="time" name="time" required>
+            
+            <button type="submit">Add Plant</button>
+        </form>
+    </div>
+    <script>
+        function logout() {
+            document.cookie = 'authToken=; max-age=0; path=/'; // Clear auth token
+            document.cookie = 'username=; max-age=0; path=/'; // Clear username
+            document.cookie = 'role=; max-age=0; path=/'; // Clear role
+            window.location.href = '/pages/login.html';
+        }
+    </script>
+</body>
+</html>

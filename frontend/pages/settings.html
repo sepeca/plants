@@ -5,59 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="../assets/js/notifications.js"></script>
 </head>
 <body>
     <div class="logout">
-        <button class="logout-btn">Logout</button>
+        <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
-    <nav>
-        <ul>
-            <li><a href="dashboard.html">Dashboard</a></li>
-            <li><a href="kalendar.html">Kalendar</a></li>
-            <li><a href="settings.html">Settings</a></li>
-        </ul>
-    </nav>
-
+    <nav></nav>
     <div class="settings-container">
-        <h2>Settings</h2>
-
+        <h3>Account Settings</h3>
         <div class="user-settings">
-            <h3>User Settings - moje zahrada</h3>
-            <form action="/update-profile" method="POST">
+            <form id="change-password-form">
                 <table>
                     <tr>
-                        <th>Field</th>
-                        <th>Value</th>
+                        <td><label for="current-password">Current Password:</label></td>
+                        <td><input type="password" id="current-password" name="current-password" required></td>
                     </tr>
                     <tr>
-                        <td><label for="organization">Organization:</label></td>
-                        <td><input type="text" id="organization" name="organization" value="Organization1" required></td>
+                        <td><label for="new-password">New Password:</label></td>
+                        <td><input type="password" id="new-password" name="new-password" required></td>
                     </tr>
                     <tr>
-                        <td><label for="username">Username:</label></td>
-                        <td><input type="text" id="username" name="username" value="JohnDoe" required></td>
-                    </tr>
-                    <tr>
-                        <td><label for="email">Email:</label></td>
-                        <td><input type="email" id="email" name="email" value="johndoe@example.com" required></td>
-                    </tr>
-                    <tr>
-                        <td><label for="password">Password:</label></td>
-                        <td><input type="password" id="password" name="password" required></td>
-                    </tr>
-                    <tr>
-                        <td><label for="confirm-password">Confirm Password:</label></td>
-                        <td><input type="password" id="confirm-password" name="confirm-password" required></td>
+                        <td><label for="confirm-new-password">Confirm New Password:</label></td>
+                        <td><input type="password" id="confirm-new-password" name="confirm-new-password" required></td>
                     </tr>
                 </table>
-                <button class="settings-btn" type="submit">Save Changes</button>
+                <button class="settings-btn" type="submit">Change Password</button>
             </form>
         </div>
-
-        <div class="export-data">
-            <h3>Export Data</h3>
-            <button class="export-btn">Export My Data</button>
-        </div>
     </div>
+    <script>
+        function logout() {
+            document.cookie = 'authToken=; max-age=0; path=/'; // Clear auth token
+            document.cookie = 'username=; max-age=0; path=/'; // Clear username
+            document.cookie = 'role=; max-age=0; path=/'; // Clear role
+            window.location.href = '/pages/login.html';
+        }
+
+        document.getElementById('change-password-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmNewPassword = document.getElementById('confirm-new-password').value;
+
+            if (newPassword !== confirmNewPassword) {
+                alert('New passwords do not match.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+
+                if (response.ok) {
+                    alert('Password changed successfully. You will be logged out.');
+                    logout();
+                } else {
+                    alert('Failed to change password. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error changing password:', error);
+                alert('An error occurred. Please try again later.');
+            }
+        });
+    </script>
 </body>
 </html>
