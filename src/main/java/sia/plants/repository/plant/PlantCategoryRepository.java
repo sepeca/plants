@@ -1,10 +1,11 @@
 package sia.plants.repository.plant;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import sia.plants.model.plant.PlantInfo;
+
 import org.springframework.stereotype.Repository;
+import sia.plants.model.plant.PlantCategory;
 
 
 @Repository
-public interface PlantInfoRepository extends JpaRepository<PlantInfo, Integer> {
+public interface PlantCategoryRepository extends JpaRepository<PlantCategory, Integer> {
 }
