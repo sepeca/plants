@@ -5,11 +5,11 @@ import sia.plants.model.Organization;
 
 import java.util.*;
 
-
 @Entity
 @Table(name = "plant")
 public class Plant {
     @Id
+    @Column(name = "plantid")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer plantId;
 

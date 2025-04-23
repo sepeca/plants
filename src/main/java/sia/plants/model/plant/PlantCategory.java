@@ -1,10 +1,12 @@
 package sia.plants.model.plant;
 import jakarta.persistence.*;
 import java.util.*;
+
 @Entity
 @Table(name = "plant_category")
 public class PlantCategory {
     @Id
+    @Column(name = "plant_categoryid")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer plantCategoryId;
     @Column(nullable = false)

@@ -5,12 +5,13 @@ import jakarta.persistence.*;
 @Table(name = "plant_info")
 public class PlantInfo {
     @Id
+    @Column(name = "plant_infoid")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer plantInfoId;
 
     private String humidity;
     private String lightRequirements;
-    private Short water;
+    private String water;
     private String temperatureRange;
 
     public Integer getPlantInfoId() {
@@ -37,11 +38,11 @@ public class PlantInfo {
         this.lightRequirements = lightRequirements;
     }
 
-    public Short getWater() {
+    public String getWater() {
         return water;
     }
 
-    public void setWater(Short water) {
+    public void setWater(String water) {
         this.water = water;
     }
 

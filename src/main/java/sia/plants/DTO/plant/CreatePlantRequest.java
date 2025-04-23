@@ -1,0 +1,23 @@
+package sia.plants.DTO.plant;
+
+import lombok.Data;
+
+import java.util.List;
+import java.util.UUID;
+
+@Data
+public class CreatePlantRequest {
+    private String plantName;
+    private String species;
+    private UUID organizationId;
+
+    private String locationName;
+    private String categoryName;
+
+    private String humidity;
+    private String lightRequirements;
+    private String water;
+    private String temperatureRange;
+
+    private List<String> imageUrls;
+}

@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 @Table(name = "image")
 public class Image {
     @Id
+    @Column(name = "imageid")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long imageId;
 

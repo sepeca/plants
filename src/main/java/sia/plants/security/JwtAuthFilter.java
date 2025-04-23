@@ -28,10 +28,11 @@ public class JwtAuthFilter extends GenericFilter {
                 if ("jwt".equals(cookie.getName())) {
                     String token = cookie.getValue();
                     if (jwtService.validateToken(token)) {
-                        String username = jwtService.extractUsername(token);
+                        String userId = jwtService.extractUserId(token);
                         UsernamePasswordAuthenticationToken auth =
-                                new UsernamePasswordAuthenticationToken(username, null, null);
+                                new UsernamePasswordAuthenticationToken(userId, null, null);
                         SecurityContextHolder.getContext().setAuthentication(auth);
+                        break;
                     }
                 }
             }

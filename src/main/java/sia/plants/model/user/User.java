@@ -1,5 +1,6 @@
 package sia.plants.model.user;
 import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
 import sia.plants.model.Organization;
 
 import java.util.*;
@@ -7,7 +8,9 @@ import java.util.*;
 @Table(name = "users")
 public class User {
     @Id
-    @Column(name = "userid")
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "userid", updatable = false, nullable = false)
     private UUID userId;
 
     @Column(nullable = false, unique = true)

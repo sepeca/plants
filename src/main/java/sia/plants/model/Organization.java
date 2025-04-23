@@ -1,11 +1,16 @@
 package sia.plants.model;
+
 import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
+
 import java.util.*;
 @Entity
 @Table(name = "organization")
 public class Organization {
     @Id
-    @Column(name = "organizationid")
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "organizationid", updatable = false, nullable = false)
     private UUID organizationId;
 
     @Column(nullable = false)

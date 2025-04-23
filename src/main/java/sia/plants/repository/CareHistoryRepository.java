@@ -2,12 +2,13 @@ package sia.plants.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import sia.plants.model.CareHistory;
-import sia.plants.model.plant.Plant;
 
-import java.util.UUID;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 
 @Repository
-public interface CareHIstoryRepository extends JpaRepository<CareHistory, Integer> {
+public interface CareHistoryRepository extends JpaRepository<CareHistory, Integer> {
+    List<CareHistory> findAllByPlant_PlantId(Integer plantId);
 }
