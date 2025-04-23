@@ -8,6 +8,9 @@ import sia.plants.model.plant.Plant;
 import sia.plants.model.plant.PlantInfo;
 import sia.plants.repository.plant.PlantRepository;
 
+import java.util.List;
+import java.util.UUID;
+
 @Service
 public class PlantServiceImpl implements PlantService{
     private final PlantRepository plantRepository;
@@ -35,6 +38,8 @@ public class PlantServiceImpl implements PlantService{
             throw new RuntimeException("Failed to create plant: " + e.getMessage(), e);
         }
     }
+    @Override
+    public List<Integer> getAllPlantsByUserId(UUID userId){return null;}
     @Override
     public PlantInfo updatePlantInfo(){
         return null;

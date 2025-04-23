@@ -5,16 +5,20 @@ import org.springframework.transaction.annotation.Transactional;
 import sia.plants.DTO.task.CreateTaskRequest;
 import sia.plants.DTO.task.TaskPlantDTO;
 import sia.plants.DTO.task.TaskResponse;
+import sia.plants.entities.UserTaskView;
 import sia.plants.model.Task;
 import sia.plants.model.plant.Plant;
 import sia.plants.model.user.User;
 import sia.plants.model.user.UserTask;
 import sia.plants.repository.TaskRepository;
+import sia.plants.repository.entities.UserTaskViewRepository;
 import sia.plants.repository.plant.PlantRepository;
 import sia.plants.repository.user.UserRepository;
 import sia.plants.repository.user.UserTaskRepository;
 import sia.plants.security.JwtService;
+import sia.plants.service.user.UserService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,18 +29,24 @@ public class TaskServiceImpl implements TaskService {
     private final PlantRepository plantRepository;
     private final UserRepository userRepository;
     private final UserTaskRepository userTaskRepository;
+    private final UserTaskViewRepository userTaskViewRepository;
     private final JwtService jwtService;
+    private final UserService userService;
 
     public TaskServiceImpl(TaskRepository taskRepository,
                            PlantRepository plantRepository,
                            UserRepository userRepository,
                            UserTaskRepository userTaskRepository,
-                           JwtService jwtService) {
+                           UserTaskViewRepository userTaskViewRepository,
+                           JwtService jwtService,
+                           UserService userService) {
         this.taskRepository = taskRepository;
         this.plantRepository = plantRepository;
         this.userRepository = userRepository;
         this.userTaskRepository = userTaskRepository;
+        this.userTaskViewRepository = userTaskViewRepository;
         this.jwtService = jwtService;
+        this.userService = userService;
     }
 
     @Transactional
@@ -71,29 +81,17 @@ public class TaskServiceImpl implements TaskService {
         }
     }
     @Override
-    public List<TaskResponse> getTasksForUser(UUID userId, UUID orgId, boolean isAdmin) {
-        List<Task> tasks;
-        if (isAdmin) {
-            tasks = taskRepository.findTasksByOrganizationId(orgId);
-        } else {
-            tasks = taskRepository.findTasksByUserId(userId);
+    public List<UserTaskView> getAllTasks(UUID orgId) {
+        List<UUID> userIds = userService.getOrgMembersIds(orgId);
+        List<UserTaskView> allTasks = new ArrayList<>();
+        for (UUID userId : userIds) {
+            allTasks.addAll(getMyTasks(userId));
         }
-        return tasks.stream().map(task -> {
-            TaskPlantDTO plantDTO = new TaskPlantDTO(
-                    task.getPlant().getPlantId(),
-                    task.getPlant().getName(),
-                    task.getPlant().getSpecies()
-            );
-
-            TaskResponse dto = new TaskResponse();
-            dto.setTaskId(task.getTaskId());
-            dto.setCompleted(task.getCompleted());
-            dto.setDueDate(task.getDueDate());
-            dto.setText(task.getText());
-            dto.setPlant(plantDTO);
-
-            return dto;
-        }).toList();
+        return allTasks;
+    }
+    @Override
+    public List<UserTaskView> getMyTasks(UUID userId) {
+        return userTaskViewRepository.findAllByUserId(userId);
     }
 }
 

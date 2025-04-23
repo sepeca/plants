@@ -6,6 +6,7 @@ import sia.plants.DTO.user.CreateUserRequest;
 import sia.plants.DTO.user.CreateUserWithOrganizationRequest;
 import sia.plants.DTO.user.OrgMemberResponse;
 import sia.plants.DTO.user.UpdateUserRequest;
+import sia.plants.entities.UserOrgView;
 import sia.plants.model.user.User;
 import sia.plants.repository.user.UserRepository;
 
@@ -17,10 +18,12 @@ import java.util.UUID;
 public interface UserService {
     User authenticate(String email, String rawPassword);
     User createUser(CreateUserRequest request);
+    UserOrgView getCurrentUserInfo(UUID userId);
     User getUserById(String userId);
     User registerUserWithOrganization(CreateUserWithOrganizationRequest request);
     User updateCurrentUser(String userId, UpdateUserRequest request);
 
     List<OrgMemberResponse> getOrgMembers(UUID orgId);
+    List<UUID> getOrgMembersIds(UUID orgId);
 }
 

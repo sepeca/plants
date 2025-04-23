@@ -6,7 +6,10 @@ import sia.plants.DTO.user.CreateUserRequest;
 import sia.plants.DTO.user.CreateUserWithOrganizationRequest;
 import sia.plants.DTO.user.OrgMemberResponse;
 import sia.plants.DTO.user.UpdateUserRequest;
+import sia.plants.entities.UserOrgView;
+import sia.plants.exception.NotFoundException;
 import sia.plants.model.user.User;
+import sia.plants.repository.entities.UserOrgViewRepository;
 import sia.plants.repository.user.UserRepository;
 import sia.plants.model.Organization;
 import sia.plants.repository.OrganizationRepository;
@@ -20,13 +23,16 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final OrganizationRepository organizationRepository;
+    private final UserOrgViewRepository userOrgViewRepository;
 
-
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder,
-                           OrganizationRepository organizationRepository) {
+    public UserServiceImpl(UserRepository userRepository,
+                           PasswordEncoder passwordEncoder,
+                           OrganizationRepository organizationRepository,
+                           UserOrgViewRepository userOrgViewRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.organizationRepository = organizationRepository;
+        this.userOrgViewRepository = userOrgViewRepository;
     }
 
     @Override
@@ -39,6 +45,11 @@ public class UserServiceImpl implements UserService {
         }
 
         return user;
+    }
+    @Override
+    public UserOrgView getCurrentUserInfo(UUID userId){
+        return userOrgViewRepository.findByUserId(userId)
+                .orElseThrow(() -> new NotFoundException("User not found in view"));
     }
     @Override
     public User getUserById(String userId){
@@ -105,6 +116,12 @@ public class UserServiceImpl implements UserService {
                     dto.setEmail(user.getEmail());
                     return dto;
                 })
+                .toList();
+    }
+    @Override
+    public List<UUID> getOrgMembersIds(UUID orgId){
+        return userRepository.findAllByOrganization_OrganizationId(orgId).stream()
+                .map(user -> user.getUserId())
                 .toList();
     }
 }

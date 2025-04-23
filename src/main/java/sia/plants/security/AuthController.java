@@ -6,6 +6,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sia.plants.DTO.user.*;
+import sia.plants.entities.UserOrgView;
 import sia.plants.model.Organization;
 import sia.plants.model.user.User;
 import sia.plants.repository.OrganizationRepository;
@@ -117,17 +118,11 @@ public class AuthController {
         if (!jwtService.validateToken(token)) {
             throw new IllegalArgumentException("Invalid token");
         }
-        String userId = jwtService.extractUserId(token);
-        User user = userService.getUserById(userId);
-        String organizationName = user.getOrganization().getName();
 
-        UserDTO dto = new UserDTO(
-                user.getName(),
-                user.getEmail(),
-                user.isAdmin(),
-                organizationName
-        );
-        return ResponseEntity.ok(dto);
+        UUID userId = UUID.fromString(jwtService.extractUserId(token));
+        UserOrgView info = userService.getCurrentUserInfo(userId);
+
+        return ResponseEntity.ok(info);
     }
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(

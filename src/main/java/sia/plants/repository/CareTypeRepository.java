@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
 
 
 @Repository
-public interface CareTypeRepository extends JpaRepository<CareType, Short> {
+public interface CareTypeRepository extends JpaRepository<CareType, Integer> {
 }

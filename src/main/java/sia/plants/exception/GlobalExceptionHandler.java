@@ -22,10 +22,25 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(404).body(errorBody);
     }
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<?> handleDuplicateEmail(DataIntegrityViolationException ex) {
+    public ResponseEntity<?> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        ex.getRootCause();
+        String message = ex.getRootCause().getMessage();
+
         Map<String, String> errorBody = new HashMap<>();
-        errorBody.put("error", "User with this email already exists");
-        return ResponseEntity.status(409).body(errorBody);
+
+        if (message != null && message.contains("User and plant must belong to the same organization")) {
+            errorBody.put("error", "User and plant must belong to the same organization");
+            return ResponseEntity.status(403).body(errorBody);
+        }
+
+        // Обработка других возможных нарушений целостности, например email
+        if (message != null && message.contains("users_email_key")) {
+            errorBody.put("error", "User with this email already exists");
+            return ResponseEntity.status(409).body(errorBody);
+        }
+
+        errorBody.put("error", "Data integrity violation: " + message);
+        return ResponseEntity.status(400).body(errorBody);
     }
 
     @ExceptionHandler(RuntimeException.class)
