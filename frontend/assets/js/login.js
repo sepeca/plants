@@ -16,10 +16,10 @@ checkLoginStatus();
 // Automatically fill the organization field
 async function loadOrganization() {
     try {
-        const response = await fetch('/api/get-organization');
+        const response = await fetch('/api/get_organization');
         const data = await response.json();
-        if (data.organizationName) {
-            document.getElementById('organization').value = data.organizationName; // Fill organization field
+        if (data.organization_name) {
+            document.getElementById('organization').value = data.organization_name; // Fill organization field
         } else {
             console.error('Organization name not found in response:', data);
         }

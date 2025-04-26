@@ -6,6 +6,8 @@
     <title>Settings</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
     <script src="../assets/js/notifications.js"></script>
+    <script src="../assets/js/checkLogin.js" defer></script>
+    <script src="../assets/js/settings.js" defer></script>
 </head>
 <body>
     <div class="logout">
@@ -34,43 +36,5 @@
             </form>
         </div>
     </div>
-    <script>
-        function logout() {
-            document.cookie = 'authToken=; max-age=0; path=/'; // Clear auth token
-            document.cookie = 'username=; max-age=0; path=/'; // Clear username
-            document.cookie = 'role=; max-age=0; path=/'; // Clear role
-            window.location.href = '/pages/login.html';
-        }
-
-        document.getElementById('change-password-form').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const currentPassword = document.getElementById('current-password').value;
-            const newPassword = document.getElementById('new-password').value;
-            const confirmNewPassword = document.getElementById('confirm-new-password').value;
-
-            if (newPassword !== confirmNewPassword) {
-                alert('New passwords do not match.');
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/change-password', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ currentPassword, newPassword })
-                });
-
-                if (response.ok) {
-                    alert('Password changed successfully. You will be logged out.');
-                    logout();
-                } else {
-                    alert('Failed to change password. Please try again.');
-                }
-            } catch (error) {
-                console.error('Error changing password:', error);
-                alert('An error occurred. Please try again later.');
-            }
-        });
-    </script>
 </body>
 </html>

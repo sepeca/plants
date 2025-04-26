@@ -1,18 +1,3 @@
-async function checkAdminExists() {
-    try {
-        const response = await fetch('/api/check-admin');
-        const adminExists = await response.json();
-
-        if (adminExists) {
-            window.location.href = '/pages/login.html';
-        }
-    } catch (error) {
-        console.error('Error checking admin existence:', error);
-    }
-}
-
-checkAdminExists();
-
 document.getElementById('register-form').addEventListener('submit', async function(event) {
     event.preventDefault();
     const organization = document.getElementById('organization').value;
@@ -27,16 +12,18 @@ document.getElementById('register-form').addEventListener('submit', async functi
     }
 
     try {
-        const response = await fetch('/api/register', {
+        const response = await fetch('/api/register_self', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ organization, username, email, password })
         });
 
-        if (response.ok) {
-            window.location.href = '/pages/login.html';
+        const data = await response.json();
+
+        if (data.status === "success") {
+            window.location.href = '/pages/calendar.html'; // Redirect to calendar
         } else {
-            alert('Registration failed. Please try again.');
+            alert(`Registration failed: ${data.message || 'Unknown error'}`);
         }
     } catch (error) {
         console.error('Error during registration:', error);
