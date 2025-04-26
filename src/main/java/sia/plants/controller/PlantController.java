@@ -6,6 +6,7 @@ import sia.plants.DTO.plant.CreatePlantRequest;
 import sia.plants.DTO.plant.PlantDetailDTO;
 import sia.plants.exception.NotFoundException;
 import sia.plants.model.plant.Plant;
+import sia.plants.model.plant.PlantInfo;
 import sia.plants.repository.plant.PlantRepository;
 import sia.plants.repository.plant.ImageRepository;
 import sia.plants.model.plant.Image;
@@ -35,20 +36,23 @@ public class PlantController {
         this.jwtService = jwtService;
         this.plantService = plantService;
     }
+    @GetMapping("/get_plants")
+    public ResponseEntity<?> getPlants(@CookieValue("jwt") String token){
+        jwtService.validate(token);
+        String orgIdFromToken = jwtService.extractOrganizationId(token);
+        UUID organizationId = UUID.fromString(orgIdFromToken);
+        //TODO: отправлять PlantDetailDTO
+        return ResponseEntity.ok(plantService.getAllPlantByOrgId(organizationId));
+    }
 
-    @GetMapping("/plantDetail/{id}")
+    @GetMapping("/plant_detail/{id}")
     public ResponseEntity<?> getPlantDetail(
             @PathVariable Integer id,
             @CookieValue("jwt") String token
     ) {
-        if (!jwtService.validateToken(token)) {
-            throw new IllegalArgumentException("Invalid token");
-        }
+        jwtService.validate(token);
 
         String orgIdFromToken = jwtService.extractOrganizationId(token);
-        if (orgIdFromToken == null) {
-            throw new IllegalArgumentException("No organization information in token");
-        }
 
         Plant plant = plantRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Plant not found"));
@@ -56,7 +60,7 @@ public class PlantController {
         if (!plant.getOrganization().getOrganizationId().toString().equals(orgIdFromToken)) {
             throw new IllegalArgumentException("You are not allowed to access this plant");
         }
-
+        //TODO: перенести логику ДТО в сервис
         PlantDetailDTO dto = new PlantDetailDTO();
         dto.setId(plant.getPlantId());
         dto.setName(plant.getName());
@@ -90,18 +94,14 @@ public class PlantController {
     @PostMapping("/plant")
     public ResponseEntity<String> createSmartPlant(@RequestBody CreatePlantRequest request,
                                                    @CookieValue("jwt") String token) {
-        if (!jwtService.validateToken(token)) {
-            throw new IllegalArgumentException("Invalid token");
-        }
+        jwtService.validate(token);
 
         Boolean isAdmin = jwtService.extractIsAdmin(token);
         if (!Boolean.TRUE.equals(isAdmin)) {
             throw new IllegalArgumentException("Only admins can create flowers");
         }
         String orgId = jwtService.extractOrganizationId(token);
-        if (orgId == null){
-            throw new IllegalArgumentException("Organization of yours is not found");
-        }
+
         request.setOrganizationId(UUID.fromString(orgId));
 
 

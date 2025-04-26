@@ -42,13 +42,25 @@ public class JwtService {
             return false;
         }
     }
-
+    public void validate(String token){
+        if (!validateToken(token)) {
+            throw new IllegalArgumentException("Invalid token");
+        }
+    }
     public String extractUserId(String token) {
-        return extractClaim(token, "userId", String.class);
+        String userId = extractClaim(token, "userId", String.class);
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID not found in token");
+        }
+        return userId;
     }
 
     public String extractOrganizationId(String token) {
-        return extractClaim(token, "organizationId", String.class);
+        String organizationId = extractClaim(token, "organizationId", String.class);
+        if (organizationId == null) {
+            throw new IllegalArgumentException("Organization ID not found in token");
+        }
+        return organizationId;
     }
 
     public Boolean extractIsAdmin(String token) {

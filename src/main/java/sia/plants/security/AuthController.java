@@ -13,9 +13,7 @@ import sia.plants.repository.OrganizationRepository;
 import sia.plants.repository.user.UserRepository;
 import sia.plants.service.user.UserService;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 public class AuthController {
@@ -91,9 +89,7 @@ public class AuthController {
             @RequestBody CreateUserRequest request,
             @CookieValue("jwt") String token
     ) {
-        if (!jwtService.validateToken(token)) {
-            throw new IllegalArgumentException("Invalid token");
-        }
+        jwtService.validate(token);
 
         Boolean isAdmin = jwtService.extractIsAdmin(token);
         if (!Boolean.TRUE.equals(isAdmin)) {
@@ -115,9 +111,7 @@ public class AuthController {
     public ResponseEntity<?> profile(
             @CookieValue("jwt") String token
     ) {
-        if (!jwtService.validateToken(token)) {
-            throw new IllegalArgumentException("Invalid token");
-        }
+        jwtService.validate(token);
 
         UUID userId = UUID.fromString(jwtService.extractUserId(token));
         UserOrgView info = userService.getCurrentUserInfo(userId);
@@ -129,19 +123,15 @@ public class AuthController {
             @RequestBody UpdateUserRequest request,
             @CookieValue("jwt") String token
     ) {
-        if (!jwtService.validateToken(token)) {
-            throw new IllegalArgumentException("Invalid token");
-        }
+        jwtService.validate(token);
 
         String userId = jwtService.extractUserId(token);
         userService.updateCurrentUser(userId, request);
         return ResponseEntity.ok("User updated successfully");
     }
-    @GetMapping("/org_members")
+    @GetMapping("api/org_members")
     public ResponseEntity<?> getOrgMembers(@CookieValue("jwt") String token) {
-        if (!jwtService.validateToken(token)) {
-            throw new IllegalArgumentException("Invalid token");
-        }
+        jwtService.validate(token);
 
         String orgIdStr = jwtService.extractOrganizationId(token);
         if (orgIdStr == null) {
@@ -152,4 +142,22 @@ public class AuthController {
         List<OrgMemberResponse> members = userService.getOrgMembers(orgId);
         return ResponseEntity.ok(members);
     }
+    @GetMapping("api/get_organization")
+    public ResponseEntity<?> getOrganizationName(@CookieValue("jwt") String token){
+        jwtService.validate(token);
+
+        String orgIdStr = jwtService.extractOrganizationId(token);
+        if (orgIdStr == null) {
+            return ResponseEntity.status(400).body("Organization ID not found in token");
+        }
+        UUID orgId = UUID.fromString(orgIdStr);
+        Organization organization = organizationRepository.findById(orgId)
+                .orElseThrow(() -> new IllegalArgumentException("Organization not found"));
+
+        Map<String, String> response = new HashMap<>();
+        response.put("organizationName", organization.getName());
+        return ResponseEntity.ok(response);
+    }
+
+
 }

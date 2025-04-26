@@ -48,4 +48,8 @@ public class PlantServiceImpl implements PlantService{
     public CareHistory addCareEvent (){
         return null;
     };
+    @Override
+    public List<Plant> getAllPlantByOrgId(UUID organizationId){
+        return plantRepository.findAllByOrganization_OrganizationId(organizationId);
+    }
 }

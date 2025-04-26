@@ -13,4 +13,5 @@ public interface PlantService {
     List<Integer> getAllPlantsByUserId(UUID userId);
     PlantInfo updatePlantInfo();
     CareHistory addCareEvent ();
+    List<Plant> getAllPlantByOrgId(UUID organizationId);
 }

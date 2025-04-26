@@ -12,4 +12,5 @@ public class CreateTaskRequest {
     private Timestamp dueDate;
     private Integer plantId;
     private List<UUID> userIds;
+    private Boolean me;
 }

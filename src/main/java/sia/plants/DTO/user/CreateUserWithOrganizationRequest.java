@@ -9,4 +9,5 @@ public class CreateUserWithOrganizationRequest {
     private String password;
 
     private String organizationName;
+
 }

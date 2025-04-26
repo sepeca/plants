@@ -18,9 +18,7 @@ import sia.plants.repository.user.UserTaskRepository;
 import sia.plants.security.JwtService;
 import sia.plants.service.user.UserService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class TaskServiceImpl implements TaskService {
@@ -55,6 +53,7 @@ public class TaskServiceImpl implements TaskService {
 
 
         UUID orgId = UUID.fromString(jwtService.extractOrganizationId(token));
+        UUID currentUserId = UUID.fromString(jwtService.extractUserId(token));
 
         Plant plant = plantRepository.findById(request.getPlantId())
                 .orElseThrow(() -> new RuntimeException("Plant not found"));
@@ -71,15 +70,24 @@ public class TaskServiceImpl implements TaskService {
 
         taskRepository.save(task);
 
-        for (UUID userId : request.getUserIds()) {
+        Set<UUID> allUserIds = new HashSet<>(request.getUserIds());
+
+        // если me=true, добавляем текущего пользователя
+        if (Boolean.TRUE.equals(request.getMe())) {
+            allUserIds.add(currentUserId);
+        }
+
+        for (UUID userId : allUserIds) {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found"));
             UserTask userTask = new UserTask();
             userTask.setTask(task);
             userTask.setUser(user);
+            userTask.setNotified(false); // если поле есть
             userTaskRepository.save(userTask);
         }
     }
+    //TODO: повторное отсылание заданий которые привязаны к пользователю
     @Override
     public List<UserTaskView> getAllTasks(UUID orgId) {
         List<UUID> userIds = userService.getOrgMembersIds(orgId);

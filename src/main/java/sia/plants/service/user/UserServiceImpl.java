@@ -75,9 +75,10 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public User registerUserWithOrganization(CreateUserWithOrganizationRequest request) {
+        String orgName = request.getOrganizationName();
 
         Organization org = new Organization();
-        org.setName(request.getOrganizationName());
+        org.setName(orgName);
         organizationRepository.save(org);
 
 
