@@ -139,3 +139,21 @@ Response:
   - Success: { "status": "success" }
   - Failure: { "status": "failure", "message": "Error message" }
 
+API: Get Plants
+Endpoint: /api/get_plants
+Method: GET
+Description: Retrieves a list of all plants.
+Response:
+  - Success: Array of plant objects
+  - Failure: { "status": "failure", "message": "Error message" }
+
+API: Delete Plant
+Endpoint: /api/delete_plant
+Method: POST
+Description: Deletes a specific plant.
+Request Body:
+  - plantId: integer
+Response:
+  - Success: { "status": "success" }
+  - Failure: { "status": "failure", "message": "Error message" }
+

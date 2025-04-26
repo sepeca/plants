@@ -302,3 +302,29 @@ table tr:hover {
     cursor: pointer;
     font-size: 1.5em;
 }
+
+.task-detail-container {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.task-detail-container h2 {
+    margin-bottom: 15px;
+}
+
+.task-images {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.task-photo {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
