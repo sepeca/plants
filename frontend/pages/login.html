@@ -6,6 +6,7 @@
     <title>Login</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
     <script src="../assets/js/notifications.js"></script>
+    <script src="../assets/js/login.js" defer></script>
 </head>
 <body>
     <nav></nav>
@@ -25,46 +26,5 @@
             <button type="submit">Login</button>
         </form>
     </div>
-    <script>
-        document.getElementById('login-form').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            try {
-                const response = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    document.cookie = `authToken=${data.token}; max-age=7200; path=/`; // Auth token valid for 2 hours
-                    document.cookie = `username=${data.username}; max-age=7200; path=/`; // Username cookie
-                    document.cookie = `role=${data.role}; max-age=7200; path=/`; // Role cookie
-                    showNotification('Login successful!', true);
-                    window.location.href = '/pages/calendar.html';
-                } else {
-                    showNotification('Invalid username or password.', false);
-                }
-            } catch (error) {
-                console.error('Error during login:', error);
-                showNotification('An error occurred. Please try again later.', false);
-            }
-        });
-
-        async function loadOrganization() {
-            try {
-                const response = await fetch('/api/get-organization');
-                const data = await response.json();
-                document.getElementById('organization').value = data.organizationName;
-            } catch (error) {
-                console.error('Error loading organization name:', error);
-            }
-        }
-
-        loadOrganization();
-    </script>
 </body>
 </html>

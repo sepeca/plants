@@ -4,29 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redirecting...</title>
+    <script src="./assets/js/checkAdmin.js" defer></script>
 </head>
 <body>
     <p>Redirecting...</p>
-    <script>
-        async function checkAndRedirect() {
-            try {
-                // Check if admin exists in the database
-                const adminCheckResponse = await fetch('/api/check-admin');
-                const adminExists = await adminCheckResponse.json();
-
-                if (adminExists) {
-                    // Redirect to login page if admin exists
-                    window.location.href = '/pages/login.html';
-                } else {
-                    // Redirect to register page if no admin exists
-                    window.location.href = '/pages/register.html';
-                }
-            } catch (error) {
-                console.error('Error during redirection checks:', error);
-            }
-        }
-
-        checkAndRedirect();
-    </script>
 </body>
 </html>

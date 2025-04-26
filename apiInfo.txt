@@ -1,0 +1,15 @@
+API: Check Admin Existence
+Endpoint: /api/check-admin
+Method: GET
+Description: Checks if there is an admin user in the database.
+Response:
+  - Success: { "status": "success" }
+  - Failure: { "status": "failure" }
+
+API: Get Organization Name
+Endpoint: /api/get-organization
+Method: GET
+Description: Retrieves the name of the organization for the login form.
+Response:
+  - Success: { "organizationName": "Organization Name" }
+  - Failure: { "organizationName": null }
