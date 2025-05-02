@@ -1,3 +1,7 @@
+-- SERGEI --
+Nechapu na co overovat to z frontu
+Jestli admin u organizace neexistuje, v jadre DB org nebude existovat
+-- SERGEI --
 API: Check Admin Existence
 Endpoint: /api/check_admin
 Method: GET
