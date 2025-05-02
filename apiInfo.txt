@@ -9,7 +9,7 @@ Description: Checks if there is an admin user in the database.
 Response:
   - Success: { "status": "success" }
   - Failure: { "status": "failure" }
-
+HOTOVO
 API: Get Organization Name
 Endpoint: /api/get_organization
 Method: GET
@@ -45,7 +45,9 @@ Request Body:
 Response:
   - Success: { "token": "JWT Token", "username": "Username", "role": "Role" }
   - Failure: { "status": "failure", "message": "Invalid credentials" }
-
+-- SERGEI --
+Requestbody nechej prazdny, vsechno to mame v tokenu
+-- SERGEI --
 API: Get Tasks
 Endpoint: /api/get_tasks
 Method: GET
@@ -56,7 +58,10 @@ Request Parameters:
 Response:
   - Success: Array of task objects
   - Failure: { "status": "failure", "message": "Error message" }
-
+-- SERGEI --
+Nemamme photos pro task (asi museli by, ale uz pozde to menit)
+Get_tasks uz posila vsechno o tasku, ja vytvorim i pro oddelene task< jestli to potrebne
+-- SERGEI --
 API: Get Task Details
 Endpoint: /api/get_task_details
 Method: GET
@@ -76,7 +81,20 @@ Request Body:
 Response:
   - Success: { "status": "success" }
   - Failure: { "status": "failure", "message": "Error message" }
-
+-- SERGEI --
+API: Change Password OR/AND username
+Endpoint: /profile
+Method: PUT
+Description: Allows a user to change their password or username.
+Headers:
+  - Authorization: Bearer <authToken>
+Request Body:
+  - username: string -- mighht be not sent
+  - newPassword: string -- mighht be not sent
+Response:
+  - Success: { "status": "success" }
+  - Failure: { "status": "failure", "message": "Error message" }
+-- SERGEI --
 API: Change Password
 Endpoint: /api/change_password
 Method: POST
@@ -89,7 +107,7 @@ Request Body:
 Response:
   - Success: { "status": "success" }
   - Failure: { "status": "failure", "message": "Error message" }
-
+HOTOVO
 API: Get Users
 Endpoint: /api/get_users
 Method: GET
@@ -148,7 +166,7 @@ Request Body:
 Response:
   - Success: { "status": "success" }
   - Failure: { "status": "failure", "message": "Error message" }
-
+HOTOVO
 API: Get Plants
 Endpoint: /api/get_plants
 Method: GET
