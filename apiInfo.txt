@@ -60,7 +60,7 @@ Response:
   - Failure: { "status": "failure", "message": "Error message" }
 -- SERGEI --
 Nemamme photos pro task (asi museli by, ale uz pozde to menit)
-Get_tasks uz posila vsechno o tasku, ja vytvorim i pro oddelene task< jestli to potrebne
+Get_tasks uz posila vsechno o tasku, neni potreba oddelene ptat o informace oddeleneho tasku
 -- SERGEI --
 API: Get Task Details
 Endpoint: /api/get_task_details
