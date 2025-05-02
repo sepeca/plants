@@ -13,7 +13,9 @@ Description: Retrieves the name of the organization for the login form.
 Response:
   - Success: { "organization_name": "Organization Name" }
   - Failure: { "organization_name": null }
-
+-- SERGEI --
+proste /register_self
+-- SERGEI --
 API: Register Admin
 Endpoint: /api/register_self
 Method: POST
@@ -26,7 +28,9 @@ Request Body:
 Response:
   - Success: { "status": "success" }
   - Failure: { "status": "failure", "message": "Error message" }
-
+-- SERGEI --
+proste /login
+-- SERGEI --
 API: Login
 Endpoint: /api/login
 Method: POST
@@ -89,7 +93,9 @@ Description: Retrieves a list of all users.
 Response:
   - Success: Array of user objects
   - Failure: { "status": "failure", "message": "Error message" }
-
+-- SERGEI --
+proste /register_worker
+-- SERGEI --
 API: Add User
 Endpoint: /api/add_user
 Method: POST
