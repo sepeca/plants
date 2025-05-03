@@ -1,0 +1,153 @@
+                           !!!!!!!!!!!!!!!!!!!!! Zmenim na snake_style pozdeji !!!!!!!!!!!!!!!!!!!!!!!!
+
+GET http://localhost:8080/profile
+RESPONSE:
+{
+    "userId": "ec37fa26-f6b1-46bc-b219-8a6df04d68a3",
+    "name": "NewName",
+    "email": "admin@greenthumb.com",
+    "organizationId": "a2a62814-08b3-40d6-a5f3-e64c1797d895",
+    "organizationName": "GreenThumb Inc"
+}
+GET	http://localhost:8080/api/get_tasks
+RESPONSE:
+[
+    {
+        "taskId": 12,
+        "taskDescription": "strangeOne",
+        "completed": false,
+        "dueDate": "2025-05-03T20:37:04.381+00:00",
+        "plantId": 2,
+        "plantName": "Boston Fern",
+        "plantSpecies": "Nephrolepis exaltata",
+        "careTaker": "Worker1",
+        "assignedUsers": [
+            "Worker1"
+        ]
+    }, ... ]
+GET	http://localhost:8080/api/get_plants
+RESPONSE:                                                                              ??????????????? in which type u need response: like get_plants OR like plant_detail ?????????????????
+[
+    {
+        "plantId": 1,
+        "name": "Aloe Vera",
+        "species": "Aloe barbadensis",
+        "organization": {
+            "organizationId": "a2a62814-08b3-40d6-a5f3-e64c1797d895",
+            "name": "GreenThumb Inc"
+        },
+        "location": {
+            "locationId": 1,
+            "name": "Office Garden"
+        },
+        "plantInfo": {
+            "plantInfoId": 1,
+            "humidity": "Low",
+            "lightRequirements": "Full Sun",
+            "water": "Once a week",
+            "temperatureRange": "15-25°C"
+        },
+        "plantCategory": {
+            "plantCategoryId": 1,
+            "name": "Succulent"
+        }
+    }, ... ]
+
+GET 	http://localhost:8080/api/plant_detail/{id}
+                                                    ????????  i can bring id to requestBody, do you need it   ????????????
+RESPONSE:
+{
+    "id": 2,
+    "name": "Boston Fern",
+    "species": "Nephrolepis exaltata",
+    "organizationName": "GreenThumb Inc",
+    "categoryName": "Fern",
+    "locationName": "Lobby",
+    "humidity": "High",
+    "lightRequirements": "Indirect Light",
+    "water": "Daily",
+    "temperatureRange": "20-30°C",
+    "imageUrls": [
+        "http://example.com/image2.jpg"
+    ]
+}
+                                                       ????????  i can bring id to requestBody, do you need it   ????????????
+GET 	http://localhost:8080/api/care_history_by_plant/{id}
+RESPONSE:
+[
+    {
+        "careHistoryId": 2,
+        "careDate": "2025-04-19T17:37:48.507+00:00",
+        "imageUrl": null,
+        "notes": "Trimmed dead leaves",
+        "careTypeName": "Pruning",
+        "userEmail": "user@greenthumb.com",
+        "userName": "Bob"
+    },{
+        "careHistoryId": 4,
+        "careDate": "2025-04-19T17:37:48.507+00:00",
+        "imageUrl": null,
+        "notes": "Cleaned soil",
+        "careTypeName": "Pruning",
+        "userEmail": "admin@greenthumb.com",
+        "userName": "NewName"
+    }, ... ] 
+                                                      ???????????? do you need this endpoint at all ????????????????????????
+GET 	http://localhost:8080/api/care_history_my
+RESPONSE:
+[
+    {
+        "careHistoryId": 4,
+        "careDate": "2025-04-19T17:37:48.507+00:00",
+        "imageUrl": null,
+        "notes": "Cleaned soil",
+        "careTypeName": "Pruning",
+        "userEmail": "admin@greenthumb.com",
+        "userName": "NewName"
+    }
+]
+
+GET http://localhost:8080/api/get_users
+RESPONSE:
+[
+    {
+        "userId": "4e4d3305-8225-4a21-8c96-25ae0286fde4",
+        "name": "Worker1",
+        "email": "worker1@greenthumb.com",
+        "admin": false
+    },
+    {
+        "userId": "ec37fa26-f6b1-46bc-b219-8a6df04d68a3",
+        "name": "NewName",
+        "email": "admin@greenthumb.com",
+        "admin": true
+    },
+    {
+        "userId": "bd1db3fa-08cf-428c-94e1-4bab9fa4a563",
+        "name": "Bob",
+        "email": "user@greenthumb.com",
+        "admin": true
+    }
+]
+
+GET http://localhost:8080/api/get_organization    ????????????????????? do you need organizationId  ??????????????????????????????????
+RESPONSE:
+{
+    "organizationName": "GreenThumb Inc"
+}
+
+GET	http://localhost:8080/api/care_types       ??????????????????????? exists for easy choosing for user, might be used in POST 	http://localhost:8080/api/create_care_history (look in postman) ??????????????????
+[
+    {
+        "careTypeId": 1,
+        "name": "Watering"
+    },
+    {
+        "careTypeId": 2,
+        "name": "Fertilizing"
+    },
+    {
+        "careTypeId": 3,
+        "name": "Pruning"
+    }
+]
