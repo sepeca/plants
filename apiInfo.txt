@@ -151,7 +151,23 @@ Request Body:
 Response:
   - Success: { "status": "success" }
   - Failure: { "status": "failure", "message": "Error message" }
-
+--SERGEI--
+RequestBody:
+{
+  "plantName": "Ficus",
+  "species": "Ficus benjamina",
+  "locationName": "Greenhouse A",
+  "categoryName": "Tropical",
+  "humidity": "High",
+  "lightRequirements": "Indirect sunlight",
+  "water": "Once a week",
+  "temperatureRange": "20-25C",
+  "imageUrls": [
+    "https://yourbucket.supabase.co/storage/v1/object/public/plants/ficus1.jpg",
+    "https://yourbucket.supabase.co/storage/v1/object/public/plants/ficus2.jpg"
+  ]
+}
+--SERGEI--
 API: Add Plant
 Endpoint: /api/add_plant
 Method: POST
