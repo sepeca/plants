@@ -1,7 +1,3 @@
--- SERGEI --
-Nechapu na co overovat to z frontu
-Jestli admin u organizace neexistuje, v jadre DB org nebude existovat
--- SERGEI --
 API: Check Admin Existence
 Endpoint: /api/check_admin
 Method: GET
@@ -10,6 +6,17 @@ Response:
   - Success: { "status": "success" }
   - Failure: { "status": "failure" }
 HOTOVO
+-- SERGEI --
+Nechapu na co overovat to z frontu
+Jestli admin u organizace neexistuje, v jadre DB org nebude existovat
+-- SERGEI --
+-- odpoved --
+Front sa pyta ci existuje admin ucet ak nie tak sa to berie ako prve spustenie aplikacie
+-- odpoved --
+
+
+
+
 API: Get Organization Name
 Endpoint: /api/get_organization
 Method: GET
@@ -17,9 +24,10 @@ Description: Retrieves the name of the organization for the login form.
 Response:
   - Success: { "organization_name": "Organization Name" }
   - Failure: { "organization_name": null }
--- SERGEI --
-proste /register_self
--- SERGEI --
+
+
+
+
 API: Register Admin
 Endpoint: /api/register_self
 Method: POST
@@ -33,8 +41,13 @@ Response:
   - Success: { "status": "success" }
   - Failure: { "status": "failure", "message": "Error message" }
 -- SERGEI --
-proste /login
+proste /register_self
 -- SERGEI --
+TODO
+
+
+
+
 API: Login
 Endpoint: /api/login
 Method: POST
@@ -46,8 +59,13 @@ Response:
   - Success: { "token": "JWT Token", "username": "Username", "role": "Role" }
   - Failure: { "status": "failure", "message": "Invalid credentials" }
 -- SERGEI --
-Requestbody nechej prazdny, vsechno to mame v tokenu
+proste /login
 -- SERGEI --
+TODO
+
+
+
+
 API: Get Tasks
 Endpoint: /api/get_tasks
 Method: GET
@@ -59,9 +77,12 @@ Response:
   - Success: Array of task objects
   - Failure: { "status": "failure", "message": "Error message" }
 -- SERGEI --
-Nemamme photos pro task (asi museli by, ale uz pozde to menit)
-Get_tasks uz posila vsechno o tasku, neni potreba oddelene ptat o informace oddeleneho tasku
+Requestbody nechej prazdny, vsechno to mame v tokenu
 -- SERGEI --
+
+
+
+
 API: Get Task Details
 Endpoint: /api/get_task_details
 Method: GET
@@ -72,6 +93,15 @@ Response:
   - Success: { "id": integer, "last_event": "Date", "caretaker": "Name", "description": "Task description", "photos": ["URL1", "URL2"] }
   - Failure: { "status": "failure", "message": "Error message" }
 HOTOVO
+-- SERGEI --
+Nemamme photos pro task (asi museli by, ale uz pozde to menit)
+Get_tasks uz posila vsechno o tasku, neni potreba oddelene ptat o informace oddeleneho tasku
+-- SERGEI --
+TODO
+
+
+
+
 API: Finish Tasks
 Endpoint: /api/finish_tasks
 Method: POST
@@ -81,7 +111,10 @@ Request Body:
 Response:
   - Success: { "status": "success" }
   - Failure: { "status": "failure", "message": "Error message" }
--- SERGEI --
+
+
+
+
 API: Change Password OR/AND username
 Endpoint: /profile
 Method: PUT
@@ -94,7 +127,10 @@ Request Body:
 Response:
   - Success: { "status": "success" }
   - Failure: { "status": "failure", "message": "Error message" }
--- SERGEI --
+
+
+
+
 API: Change Password
 Endpoint: /api/change_password
 Method: POST
@@ -108,6 +144,10 @@ Response:
   - Success: { "status": "success" }
   - Failure: { "status": "failure", "message": "Error message" }
 HOTOVO
+
+
+
+
 API: Get Users
 Endpoint: /api/get_users
 Method: GET
@@ -115,9 +155,10 @@ Description: Retrieves a list of all users.
 Response:
   - Success: Array of user objects
   - Failure: { "status": "failure", "message": "Error message" }
--- SERGEI --
-proste /register_worker
--- SERGEI --
+
+
+
+
 API: Add User
 Endpoint: /api/add_user
 Method: POST
@@ -130,6 +171,12 @@ Request Body:
 Response:
   - Success: { "status": "success" }
   - Failure: { "status": "failure", "message": "Error message" }
+-- SERGEI --
+proste /register_worker
+-- SERGEI --
+TODO
+
+
 
 API: Delete Users
 Endpoint: /api/delete_users
@@ -141,6 +188,10 @@ Response:
   - Success: { "status": "success" }
   - Failure: { "status": "failure", "message": "Error message" }
 HOTOVO
+
+
+
+
 API: Toggle Admin
 Endpoint: /api/toggle_admin
 Method: POST
@@ -148,6 +199,24 @@ Description: Toggles the admin role for a user.
 Request Body:
   - userId: integer
   - isAdmin: boolean
+Response:
+  - Success: { "status": "success" }
+  - Failure: { "status": "failure", "message": "Error message" }
+
+
+
+
+API: Add Plant
+Endpoint: /api/add_plant
+Method: POST
+Description: Adds a new plant to the system.
+Request Body:
+  - plantName: string
+  - species: string
+  - room: string
+  - task: string
+  - date: string (YYYY-MM-DD)
+  - time: string (HH:MM)
 Response:
   - Success: { "status": "success" }
   - Failure: { "status": "failure", "message": "Error message" }
@@ -168,21 +237,11 @@ RequestBody:
   ]
 }
 --SERGEI--
-API: Add Plant
-Endpoint: /api/add_plant
-Method: POST
-Description: Adds a new plant to the system.
-Request Body:
-  - plantName: string
-  - species: string
-  - room: string
-  - task: string
-  - date: string (YYYY-MM-DD)
-  - time: string (HH:MM)
-Response:
-  - Success: { "status": "success" }
-  - Failure: { "status": "failure", "message": "Error message" }
 HOTOVO
+
+
+
+
 API: Get Plants
 Endpoint: /api/get_plants
 Method: GET
@@ -190,6 +249,9 @@ Description: Retrieves a list of all plants.
 Response:
   - Success: Array of plant objects
   - Failure: { "status": "failure", "message": "Error message" }
+
+
+
 
 API: Delete Plant
 Endpoint: /api/delete_plant
@@ -200,4 +262,6 @@ Request Body:
 Response:
   - Success: { "status": "success" }
   - Failure: { "status": "failure", "message": "Error message" }
+
+
 
