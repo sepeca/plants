@@ -24,8 +24,12 @@ Description: Retrieves the name of the organization for the login form.
 Response:
   - Success: { "organization_name": "Organization Name" }
   - Failure: { "organization_name": null }
-
-
+GET http://localhost:8080/api/get_organization    ????????????????????? do you need organizationId  ??????????????????????????????????
+RESPONSE:
+{
+    "organizationName": "GreenThumb Inc"
+}
+TODO
 
 
 API: Register Admin
@@ -154,6 +158,27 @@ Method: GET
 Description: Retrieves a list of all users.
 Response:
   - Success: Array of user objects
+Example:
+    [
+        {
+            "userId": "4e4d3305-8225-4a21-8c96-25ae0286fde4",
+            "name": "Worker1",
+            "email": "worker1@greenthumb.com",
+            "admin": false
+        },
+        {
+            "userId": "ec37fa26-f6b1-46bc-b219-8a6df04d68a3",
+            "name": "NewName",
+            "email": "admin@greenthumb.com",
+            "admin": true
+        },
+        {
+            "userId": "bd1db3fa-08cf-428c-94e1-4bab9fa4a563",
+            "name": "Bob",
+            "email": "user@greenthumb.com",
+            "admin": true
+        }
+    ]
   - Failure: { "status": "failure", "message": "Error message" }
 
 

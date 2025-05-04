@@ -7,6 +7,6 @@ function checkLoginStatus() {
     }, {});
 
     if (!cookies.authToken) {
-        window.location.href = '/index.html'; // Redirect to index if not logged in
+        window.location.href = '../index.html'; // Redirect to index if not logged in
     }
 }
