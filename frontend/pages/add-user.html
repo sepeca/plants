@@ -13,7 +13,10 @@
     <script type="module" src="../assets/js/checkAdminAccess.js" defer></script>
     <script type="module" src="../assets/js/checkLogin.js" defer></script>
     <script type="module" src="../assets/js/addUser.js" defer></script>
-    <script src="../assets/js/logout.js" defer></script>
+    <script type="module">
+        import { logout } from '../assets/js/logout.js';
+        window.logout = logout;
+    </script>
 </head>
 <body>
     <nav>
