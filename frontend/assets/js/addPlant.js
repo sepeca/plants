@@ -1,10 +1,5 @@
 checkLoginStatus();
 
-function logout() {
-    document.cookie = 'authToken=; max-age=0; path=/'; // Clear auth token
-    window.location.href = './login.html'; // Redirect to login
-}
-
 document.getElementById('add-plant-form').addEventListener('submit', async function(event) {
     event.preventDefault();
     const plantName = document.getElementById('plant-name').value;
@@ -28,7 +23,7 @@ document.getElementById('add-plant-form').addEventListener('submit', async funct
     }
 
     try {
-        const response = await fetch('/api/add_plant', {
+        const response = await fetch('http://localhost:8081/api/add_plant', { // Use full URL with port 8081
             method: 'POST',
             body: formData
         });
@@ -49,7 +44,7 @@ document.getElementById('add-plant-form').addEventListener('submit', async funct
 $(document).ready(function () {
     $('#plant-table').DataTable({
         ajax: {
-            url: '/api/get_plants',
+            url: 'http://localhost:8081/api/get_plants', // Use full URL with port 8081
             dataSrc: ''
         },
         columns: [
@@ -77,7 +72,7 @@ $(document).ready(function () {
         }
 
         try {
-            const response = await fetch('/api/delete_plant', {
+            const response = await fetch('http://localhost:8081/api/delete_plant', { // Use full URL with port 8081
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ plantId })

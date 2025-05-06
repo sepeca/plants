@@ -25,7 +25,7 @@ document.getElementById('login-form').addEventListener('submit', async function(
             const data = await response.json();
             document.cookie = `authToken=${data.token}; max-age=7200; path=/`; // Auth token valid for 2 hours
             showNotification('Login successful!', true);
-            window.location.href = '/pages/calendar.html'; // Redirect to calendar
+            window.location.href = './calendar.html'; // Redirect to calendar
         } else {
             showNotification('Invalid email or password.', false); // Show error notification
         }

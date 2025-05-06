@@ -1,14 +1,9 @@
 checkLoginStatus();
 
-function logout() {
-    document.cookie = 'authToken=; max-age=0; path=/'; // Clear auth token
-    window.location.href = './login.html'; // Redirect to login
-}
-
 $(document).ready(function () {
     const table = $('#user-table').DataTable({
         ajax: {
-            url: '/api/get_users',
+            url: 'http://localhost:8081/api/get_users', // Use full URL with port 8081
             dataSrc: ''
         },
         columns: [
@@ -59,7 +54,7 @@ $(document).ready(function () {
         }
 
         try {
-            const response = await fetch('/api/add_user', {
+            const response = await fetch('http://localhost:8081/api/add_user', { // Use full URL with port 8081
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, email, password, isAdmin })
@@ -94,7 +89,7 @@ $(document).ready(function () {
         }
 
         try {
-            const response = await fetch('/api/delete_users', {
+            const response = await fetch('http://localhost:8081/api/delete_users', { // Use full URL with port 8081
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userIds: selectedUsers })
@@ -116,7 +111,7 @@ $(document).ready(function () {
         const userId = $(this).data('id');
         const isAdmin = $(this).data('is-admin');
         try {
-            const response = await fetch('/api/toggle_admin', {
+            const response = await fetch('http://localhost:8081/api/toggle_admin', { // Use full URL with port 8081
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId, isAdmin: !isAdmin })

@@ -1,15 +1,10 @@
 // Import checkLogin.js functionality by including it in the HTML
 checkLoginStatus();
 
-function logout() {
-    document.cookie = 'authToken=; max-age=0; path=/'; // Clear auth token
-    window.location.href = './login.html'; // Redirect to login
-}
-
 $(document).ready(function () {
     const table = $('#plant-tasks').DataTable({
         ajax: {
-            url: '/api/get_tasks',
+            url: 'http://localhost:8081/api/get_tasks', // Use full URL with port 8081
             dataSrc: '',
             beforeSend: function (xhr) {
                 const token = document.cookie.split(';').find(cookie => cookie.trim().startsWith('authToken='))
@@ -75,7 +70,7 @@ $(document).ready(function () {
     }
 
     // Handle finishing selected tasks
-    $('#finish-tasks-btn').on('click', function () {
+    $('#finish-tasks-btn').on('click', async function () {
         const selectedTasks = [];
         $('.task-select:checked').each(function () {
             selectedTasks.push($(this).data('id'));
@@ -95,22 +90,23 @@ $(document).ready(function () {
             return;
         }
 
-        fetch('/api/finish_tasks', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` // Include JWT in the request
-            },
-            body: JSON.stringify({ taskIds: selectedTasks }) // Send task IDs
-        })
-            .then(response => {
-                if (response.ok) {
-                    alert('Tasks marked as finished.');
-                    table.ajax.reload(); // Reload table data
-                } else {
-                    alert('Failed to finish tasks. Please try again.');
-                }
-            })
-            .catch(error => console.error('Error finishing tasks:', error));
+        try {
+            const response = await fetch('http://localhost:8081/api/finish_tasks', { // Use full URL with port 8081
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` // Include JWT in the request
+                },
+                body: JSON.stringify({ taskIds: selectedTasks }) // Send task IDs
+            });
+            if (response.ok) {
+                alert('Tasks marked as finished.');
+                table.ajax.reload(); // Reload table data
+            } else {
+                alert('Failed to finish tasks. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error finishing tasks:', error);
+        }
     });
 });

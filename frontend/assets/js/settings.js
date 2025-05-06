@@ -1,11 +1,6 @@
 // Import checkLogin.js functionality by including it in the HTML
 checkLoginStatus();
 
-function logout() {
-    document.cookie = 'authToken=; max-age=0; path=/'; // Clear auth token
-    window.location.href = './login.html'; // Redirect to login
-}
-
 document.getElementById('change-username-form').addEventListener('submit', async function(event) {
     event.preventDefault();
     const newUsername = document.getElementById('new-username').value;
