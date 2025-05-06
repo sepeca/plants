@@ -3,9 +3,7 @@ checkLoginStatus();
 
 function logout() {
     document.cookie = 'authToken=; max-age=0; path=/'; // Clear auth token
-    document.cookie = 'username=; max-age=0; path=/'; // Clear username
-    document.cookie = 'role=; max-age=0; path=/'; // Clear role
-    window.location.href = '/pages/login.html';
+    window.location.href = './login.html'; // Redirect to login
 }
 
 document.getElementById('change-username-form').addEventListener('submit', async function(event) {

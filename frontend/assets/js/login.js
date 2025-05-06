@@ -1,12 +1,6 @@
 // Check if user is already logged in
 function checkLoginStatus() {
-    const cookies = document.cookie.split(';').reduce((acc, cookie) => {
-        const [key, value] = cookie.trim().split('=');
-        acc[key] = value;
-        return acc;
-    }, {});
-
-    if (cookies.authToken) {
+    if (document.cookie.includes('authToken=')) {
         window.location.href = '/pages/calendar.html'; // Redirect to calendar if logged in
     }
 }
@@ -20,10 +14,11 @@ document.getElementById('login-form').addEventListener('submit', async function(
     const password = document.getElementById('password').value;
 
     try {
-        const response = await fetch('/login', {
+        const response = await fetch('http://localhost:8081/login', { // Use full URL with port 8081
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password }) // Send email and password
+            body: JSON.stringify({ email, password }), // Send email and password
+            credentials: 'include', // Include cookies in the request
         });
 
         if (response.ok) {
