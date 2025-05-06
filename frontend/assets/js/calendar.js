@@ -1,28 +1,19 @@
-import { SERVER_ADDRESS } from './config.js'; // Import server address
-
-// Import checkLogin.js functionality by including it in the HTML
-checkLoginStatus();
+import { SERVER_ADDRESS } from './config.js';
 
 $(document).ready(async function () {
-    const jwt = document.cookie
-        .split('; ')
-        .find(cookie => cookie.startsWith('jwt='))
-        ?.split('=')[1];
+    const token = localStorage.getItem('jwt');
 
-    if (!jwt) {
-        alert('Authentication token is missing. Please log in again.');
-        //window.location.href = './login.html';
+    if (!token) {
+        console.error('Authentication token is missing. Please log in again.');
+        window.location.href = './login.html';
         return;
     }
-
-    console.log('Token:', jwt); // Log the token to the console
 
     try {
         const response = await fetch(`${SERVER_ADDRESS}/api/get_tasks`, {
             method: 'GET',
-            credentials: 'include', // Automatically include cookies
             headers: {
-                'Authorization': `Bearer ${jwt}`
+                'Authorization': 'Bearer ' + token
             }
         });
 
@@ -55,28 +46,24 @@ $(document).ready(async function () {
                 scroller: true
             });
 
-            // Handle row click for additional details
             $('#plant-tasks tbody').on('click', '.details-btn', function () {
-                const rowId = $(this).data('id');
-                const rowData = table.row($(this).parents('tr')).data(); // Get row data
-
-                showTaskDetails(rowData); // Pass row data to the details view
+                const rowData = table.row($(this).parents('tr')).data();
+                showTaskDetails(rowData);
             });
         } else {
-            alert('Failed to fetch tasks. Please try again.');
+            console.error('Failed to fetch tasks. Please try again.');
         }
     } catch (error) {
         console.error('Error fetching tasks:', error);
-        alert('An error occurred. Please try again later.');
+        console.error('An error occurred. Please try again later.');
     }
 
-    // Show task details in the detail container
     function showTaskDetails(data) {
         const detailContainer = $('.task-detail-container');
         const detailContent = $('#task-detail-content');
 
         if (detailContainer.is(':visible')) {
-            detailContainer.hide(); // Hide details if already visible
+            detailContainer.hide();
             return;
         }
 
@@ -89,39 +76,39 @@ $(document).ready(async function () {
         `);
 
         detailContainer.show();
-        $('html, body').animate({ scrollTop: detailContainer.offset().top }, 'slow'); // Scroll to the detail container
+        $('html, body').animate({ scrollTop: detailContainer.offset().top }, 'slow');
     }
 
-    // Handle finishing selected tasks
     $('#finish-tasks-btn').on('click', async function () {
-        const selectedTasks = [];
-        $('.task-select:checked').each(function () {
-            selectedTasks.push($(this).data('id'));
-        });
+        const selectedTasks = $('.task-select:checked').map(function () {
+            return $(this).data('id');
+        }).get();
 
         if (selectedTasks.length === 0) {
-            alert('No tasks selected.');
+            console.error('No tasks selected.');
             return;
         }
 
         try {
             const response = await fetch(`${SERVER_ADDRESS}/api/finish_tasks`, {
                 method: 'POST',
-                credentials: 'include', // Automatically include cookies
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
                 },
-                body: JSON.stringify({ taskIds: selectedTasks }) // Send task IDs
+                body: JSON.stringify({ taskIds: selectedTasks })
             });
 
             if (response.ok) {
-                alert('Tasks marked as finished.');
-                $('#plant-tasks').DataTable().ajax.reload(); // Reload table data
+                console.log('Tasks marked as finished.');
+                $('#plant-tasks').DataTable().clear().rows.add([]).draw(); // Optionally reload data
             } else {
-                alert('Failed to finish tasks. Please try again.');
+                console.error('Failed to finish tasks. Please try again.');
             }
         } catch (error) {
             console.error('Error finishing tasks:', error);
         }
     });
+
+
 });

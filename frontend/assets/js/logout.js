@@ -1,4 +1,4 @@
 function logout() {
-    document.cookie = 'jwt=; path=/; max-age=0';
+    localStorage.removeItem('jwt');
     window.location.href = './login.html';
 }

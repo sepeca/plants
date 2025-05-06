@@ -9,9 +9,9 @@
     <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-    <script src="../assets/js/checkLogin.js" defer></script>
     <script src="../assets/js/notifications.js"></script>
-    <script src="../assets/js/calendar.js" defer></script>
+    <script type="module" src="../assets/js/checkLogin.js" defer></script>
+    <script type="module" src="../assets/js/calendar.js" defer></script>
     <script src="../assets/js/logout.js" defer></script>
 </head>
 <body>
@@ -55,14 +55,5 @@
             <!-- Task details will be dynamically loaded here -->
         </div>
     </div>
-
-    <script>
-        function logout() {
-            document.cookie = 'authToken=; max-age=0; path=/'; // Clear auth token
-            document.cookie = 'username=; max-age=0; path=/'; // Clear username
-            document.cookie = 'role=; max-age=0; path=/'; // Clear role
-            window.location.href = '/pages/login.html';
-        }
-    </script>
 </body>
 </html>

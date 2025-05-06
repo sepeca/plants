@@ -1,4 +1,4 @@
-import { SERVER_ADDRESS } from './config.js'; // Import server address
+import { SERVER_ADDRESS } from './config.js';
 
 document.getElementById('register-form').addEventListener('submit', async function(event) {
     event.preventDefault();
