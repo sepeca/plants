@@ -20,10 +20,10 @@
 <body>
     <nav>
         <ul>
-            <li><a href="/pages/calendar.html">Calendar</a></li>
-            <li><a href="/pages/add-plant.html">Add Plant</a></li>
-            <li><a href="/pages/add-user.html">Add User</a></li>
-            <li><a href="/pages/settings.html">Settings</a></li>
+            <li><a href="./calendar.html">Calendar</a></li>
+            <li><a href="./add-plant.html">Add Plant</a></li>
+            <li><a href="./add-user.html">Add User</a></li>
+            <li><a href="./settings.html">Settings</a></li>
             <li><a href="#" onclick="logout()">Logout</a></li>
         </ul>
     </nav>
@@ -34,22 +34,24 @@
     </div>
 
     <div class="calendar-container">
-        <button id="finish-tasks-btn" class="settings-btn" style="margin-bottom: 10px;">Finish Selected Tasks</button>
-        <table id="plant-tasks" class="display">
-            <thead>
-                <tr>
-                    <th>Select</th>
-                    <th>Task Date</th>
-                    <th>Plant Name</th>
-                    <th>Plant Type</th> <!-- Updated header -->
-                    <th>Location</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Data will be dynamically loaded via DataTables -->
-            </tbody>
-        </table>
+        <div class="table-container">
+            <table id="plant-tasks" class="display">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Task Date</th>
+                        <th>Plant Name</th>
+                        <th>Plant Type</th> <!-- Updated header -->
+                        <th>Location</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be dynamically loaded via DataTables -->
+                </tbody>
+            </table>
+            <button id="finish-tasks-btn" class="settings-btn">Finish Selected Tasks</button>
+        </div>
     </div>
 
     <div class="task-detail-container" style="display: none;">

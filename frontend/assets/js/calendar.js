@@ -18,7 +18,24 @@ $(document).ready(async function () {
         });
 
         if (response.ok) {
-            const tasks = await response.json();
+            let tasks = await response.json();
+            console.log('Tasks response:', tasks); // Log the response for debugging
+
+            // Ensure all tasks have 'type' and 'location' properties
+            tasks = tasks.map(task => {
+                if (!task.type) {
+                    console.warn(`Task with ID ${task.id} is missing the 'type' property.`);
+                }
+                if (!task.location) {
+                    console.warn(`Task with ID ${task.id} is missing the 'location' property.`);
+                }
+                return {
+                    ...task,
+                    type: task.type || 'Unknown', // Default value for 'type'
+                    location: task.location || 'Unknown' // Default value for 'location'
+                };
+            });
+
             const table = $('#plant-tasks').DataTable({
                 data: tasks,
                 columns: [
@@ -40,10 +57,22 @@ $(document).ready(async function () {
                         }
                     }
                 ],
+                createdRow: function (row, data) {
+                    const taskDate = new Date(data.taskDate);
+                    const today = new Date();
+                    const isPast = taskDate < today && taskDate.toDateString() !== today.toDateString();
+                    if (isPast) {
+                        $(row).css({
+                            'background-color': 'red',
+                            'color': 'white' // Set text color to white for better readability
+                        });
+                    }
+                },
                 pageLength: 15,
                 scrollY: '400px',
                 scrollCollapse: true,
-                scroller: true
+                scroller: true,
+                order: [[1, 'asc']] // Sort by the "Task Date" column (index 1) in ascending order
             });
 
             $('#plant-tasks tbody').on('click', '.details-btn', function () {
@@ -62,20 +91,28 @@ $(document).ready(async function () {
         const detailContainer = $('.task-detail-container');
         const detailContent = $('#task-detail-content');
 
-        if (detailContainer.is(':visible')) {
-            detailContainer.hide();
+        // Check if the clicked task is already displayed
+        if (detailContainer.is(':visible') && detailContent.data('taskId') === data.id) {
+            detailContainer.hide(); // Hide the container if the same task is clicked again
+            detailContent.removeData('taskId'); // Clear the stored task ID
             return;
         }
 
+        // Populate and show the container for the new task
         detailContent.html(`
             <p><strong>Description:</strong> ${data.description || 'No description available.'}</p>
             <p><strong>Assigned Users:</strong></p>
             <ul>
                 ${data.assignedUsers?.map(user => `<li>${user}</li>`).join('') || '<li>No users assigned.</li>'}
             </ul>
-        `);
+        `).data('taskId', data.id); // Store the task ID in the content for comparison
 
         detailContainer.show();
+
+        // Add event listener to close when clicking outside
+        $(document).off('click', closeOnOutsideClick); // Remove any existing event listener
+        $(document).on('click', closeOnOutsideClick);
+
         $('html, body').animate({ scrollTop: detailContainer.offset().top }, 'slow');
     }
 

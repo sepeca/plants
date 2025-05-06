@@ -140,6 +140,29 @@ table tr:hover {
     background-color: #e0e0e0;
 }
 
+#plant-tasks {
+    table-layout: fixed; /* Ensures columns have fixed widths */
+    width: 100%; /* Ensures the table spans the container */
+    border-collapse: collapse; /* Prevents extra spacing between cells */
+}
+
+#plant-tasks th:nth-child(3), #plant-tasks td:nth-child(3) {
+    width: 25%; /* Adjust width for 'Plant Name' column */
+}
+
+#plant-tasks th:nth-child(4), #plant-tasks td:nth-child(4) {
+    width: 25%; /* Adjust width for 'Plant Type' column */
+}
+
+#plant-tasks th:nth-child(2), #plant-tasks td:nth-child(2) {
+    width: 15%; /* Adjust width for 'Task Date' column */
+}
+
+#plant-tasks th:nth-child(1), #plant-tasks td:nth-child(1) {
+    width: 5%; /* Adjust width for 'Select' column */
+    text-align: center; /* Center align the content */
+}
+
 .plant-detail-container {
     display: flex;
     justify-content: space-between;
@@ -321,11 +344,17 @@ table tr:hover {
 }
 
 .task-detail-container {
-    margin-top: 20px;
+    position: fixed; /* Position it relative to the viewport */
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Adjust for the element's size */
+    z-index: 1000; /* Ensure it appears above other elements */
+    width: 50%; /* Adjust width as needed */
     padding: 20px;
     border: 1px solid #ddd;
     border-radius: 8px;
     background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .task-detail-container h2 {
@@ -344,4 +373,28 @@ table tr:hover {
     object-fit: cover;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.table-container {
+    padding: 10%;
+    box-sizing: border-box; /* Ensures padding is included in the element's total width/height */
+    overflow-x: auto; /* Allows horizontal scrolling if needed */
+}
+
+#finish-tasks-btn {
+    display: block;
+    width: 100%; /* Make the button as wide as the table */
+    margin-top: 10px; /* Add spacing between the table and the button */
+    padding: 10px;
+    font-size: 1.2em;
+    background-color: #6a994e;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+}
+
+#finish-tasks-btn:hover {
+    background-color: #5c8a42;
 }
