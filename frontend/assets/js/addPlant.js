@@ -1,3 +1,5 @@
+import { SERVER_ADDRESS } from './config.js'; // Import server address
+
 checkLoginStatus();
 
 document.getElementById('add-plant-form').addEventListener('submit', async function(event) {
@@ -23,7 +25,7 @@ document.getElementById('add-plant-form').addEventListener('submit', async funct
     }
 
     try {
-        const response = await fetch('http://localhost:8081/api/add_plant', { // Use full URL with port 8081
+        const response = await fetch(`${SERVER_ADDRESS}/api/add_plant`, {
             method: 'POST',
             body: formData
         });
@@ -44,7 +46,7 @@ document.getElementById('add-plant-form').addEventListener('submit', async funct
 $(document).ready(function () {
     $('#plant-table').DataTable({
         ajax: {
-            url: 'http://localhost:8081/api/get_plants', // Use full URL with port 8081
+            url: `${SERVER_ADDRESS}/api/get_plants`, // Use centralized server address
             dataSrc: ''
         },
         columns: [
@@ -72,7 +74,7 @@ $(document).ready(function () {
         }
 
         try {
-            const response = await fetch('http://localhost:8081/api/delete_plant', { // Use full URL with port 8081
+            const response = await fetch(`${SERVER_ADDRESS}/api/delete_plant`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ plantId })

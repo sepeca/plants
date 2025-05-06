@@ -1,3 +1,7 @@
+import { SERVER_ADDRESS } from './config.js'; // Import server address
+
+checkLoginStatus();
+
 document.addEventListener('DOMContentLoaded', () => {
     const taskModal = document.getElementById('task-modal');
     const taskForm = document.getElementById('task-form');
@@ -43,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch('/api/create_task', {
+            const response = await fetch(`${SERVER_ADDRESS}/api/create_task`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

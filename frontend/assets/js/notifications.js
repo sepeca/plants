@@ -1,5 +1,4 @@
 function showNotification(message, isPositive = true) {
-    // Create notification container if it doesn't exist
     let notificationContainer = document.getElementById('notification-container');
     if (!notificationContainer) {
         notificationContainer = document.createElement('div');
@@ -14,10 +13,9 @@ function showNotification(message, isPositive = true) {
         document.body.appendChild(notificationContainer);
     }
 
-    // Create notification element
     const notification = document.createElement('div');
     notification.textContent = message;
-    notification.style.backgroundColor = isPositive ? '#4CAF50' : '#F44336'; // Green for positive, red for negative
+    notification.style.backgroundColor = isPositive ? '#4CAF50' : '#F44336';
     notification.style.color = 'white';
     notification.style.padding = '10px 20px';
     notification.style.margin = '5px 0';
@@ -28,12 +26,10 @@ function showNotification(message, isPositive = true) {
     notification.style.opacity = '1';
     notification.style.transition = 'opacity 0.5s ease';
 
-    // Append notification to container
     notificationContainer.appendChild(notification);
 
-    // Remove notification after 5 seconds
     setTimeout(() => {
         notification.style.opacity = '0';
-        setTimeout(() => notification.remove(), 500); // Wait for fade-out transition
+        setTimeout(() => notification.remove(), 500);
     }, 5000);
 }

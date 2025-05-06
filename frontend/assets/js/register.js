@@ -1,3 +1,5 @@
+import { SERVER_ADDRESS } from './config.js'; // Import server address
+
 document.getElementById('register-form').addEventListener('submit', async function(event) {
     event.preventDefault();
     const organization = document.getElementById('organization').value;
@@ -12,7 +14,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
     }
 
     try {
-        const response = await fetch('http://localhost:8081/api/register_self', { // Use full URL with port 8081
+        const response = await fetch(`${SERVER_ADDRESS}/api/register_self`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ organization, username, email, password })

@@ -1,4 +1,5 @@
-// Import checkLogin.js functionality by including it in the HTML
+import { SERVER_ADDRESS } from './config.js'; // Import server address
+
 checkLoginStatus();
 
 document.getElementById('change-username-form').addEventListener('submit', async function(event) {
@@ -15,12 +16,12 @@ document.getElementById('change-username-form').addEventListener('submit', async
 
     if (!authToken) {
         alert('You are not authenticated. Please log in again.');
-        window.location.href = '/pages/login.html';
+        window.location.href = './login.html';
         return;
     }
 
     try {
-        const response = await fetch('/profile', {
+        const response = await fetch(`${SERVER_ADDRESS}/profile`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -62,7 +63,7 @@ document.getElementById('change-password-form').addEventListener('submit', async
     }
 
     try {
-        const response = await fetch('/profile', {
+        const response = await fetch(`${SERVER_ADDRESS}/profile`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

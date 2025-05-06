@@ -1,9 +1,11 @@
+import { SERVER_ADDRESS } from './config.js'; // Import server address
+
 checkLoginStatus();
 
 $(document).ready(function () {
     const table = $('#user-table').DataTable({
         ajax: {
-            url: 'http://localhost:8081/api/get_users', // Use full URL with port 8081
+            url: `${SERVER_ADDRESS}/api/get_users`, // Use centralized server address
             dataSrc: ''
         },
         columns: [
@@ -54,7 +56,7 @@ $(document).ready(function () {
         }
 
         try {
-            const response = await fetch('http://localhost:8081/api/add_user', { // Use full URL with port 8081
+            const response = await fetch(`${SERVER_ADDRESS}/api/add_user`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, email, password, isAdmin })
@@ -89,7 +91,7 @@ $(document).ready(function () {
         }
 
         try {
-            const response = await fetch('http://localhost:8081/api/delete_users', { // Use full URL with port 8081
+            const response = await fetch(`${SERVER_ADDRESS}/api/delete_users`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userIds: selectedUsers })
@@ -111,7 +113,7 @@ $(document).ready(function () {
         const userId = $(this).data('id');
         const isAdmin = $(this).data('is-admin');
         try {
-            const response = await fetch('http://localhost:8081/api/toggle_admin', { // Use full URL with port 8081
+            const response = await fetch(`${SERVER_ADDRESS}/api/toggle_admin`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId, isAdmin: !isAdmin })

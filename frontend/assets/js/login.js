@@ -1,4 +1,5 @@
-// Check if user is already logged in
+import { SERVER_ADDRESS } from './config.js'; // Import server address
+
 function checkLoginStatus() {
     if (document.cookie.includes('jwt=')) {
         window.location.href = './calendar.html'; // Redirect to calendar if logged in
@@ -7,14 +8,13 @@ function checkLoginStatus() {
 
 checkLoginStatus();
 
-// Handle login form submission
 document.getElementById('login-form').addEventListener('submit', async function(event) {
     event.preventDefault();
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
     try {
-        const response = await fetch('http://192.168.192.1:8081/login', { // Use full URL with port 8081
+        const response = await fetch(`${SERVER_ADDRESS}/login`, { // Use centralized server address
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password }), // Send email and password

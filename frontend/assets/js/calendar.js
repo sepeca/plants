@@ -1,3 +1,5 @@
+import { SERVER_ADDRESS } from './config.js'; // Import server address
+
 // Import checkLogin.js functionality by including it in the HTML
 checkLoginStatus();
 
@@ -16,10 +18,10 @@ $(document).ready(async function () {
     console.log('Token:', jwt); // Log the token to the console
 
     try {
-        const response = await fetch('http://192.168.192.1:8081/api/get_tasks', {
+        const response = await fetch(`${SERVER_ADDRESS}/api/get_tasks`, {
             method: 'GET',
             credentials: 'include', // Automatically include cookies
-headers: {
+            headers: {
                 'Authorization': `Bearer ${jwt}`
             }
         });
@@ -103,7 +105,7 @@ headers: {
         }
 
         try {
-            const response = await fetch('http://localhost:8081/api/finish_tasks', {
+            const response = await fetch(`${SERVER_ADDRESS}/api/finish_tasks`, {
                 method: 'POST',
                 credentials: 'include', // Automatically include cookies
                 headers: {
