@@ -13,10 +13,14 @@
     <script src="../assets/js/calendar.js" defer></script>
 </head>
 <body>
-    <div class="logout">
-        <button class="logout-btn" onclick="logout()">Logout</button>
-    </div>
-    <nav></nav>
+    <nav>
+        <ul>
+            <li><a href="/pages/add-plant.html">Add Plant</a></li>
+            <li><a href="/pages/add-user.html">Add User</a></li>
+            <li><a href="/pages/settings.html">Settings</a></li>
+            <li><button class="logout-btn" onclick="logout()">Logout</button></li>
+        </ul>
+    </nav>
 
     <div class="admin-actions" style="display: none;">
         <button onclick="window.location.href='/pages/add-plant.html'" class="settings-btn">Add Plant</button>
