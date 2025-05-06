@@ -46,7 +46,15 @@ $(document).ready(async function () {
                         },
                         orderable: false
                     },
-                    { data: 'taskDate' },
+                    {
+                        data: 'taskDate',
+                        render: function (data, type, row) {
+                            if (type === 'display' || type === 'filter') {
+                                return data.split('T')[0]; // Extract only the date part (YYYY-MM-DD)
+                            }
+                            return data; // Return original data for other types
+                        }
+                    },
                     { data: 'plantName' },
                     { data: 'type' },
                     { data: 'location' },

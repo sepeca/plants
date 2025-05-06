@@ -4,104 +4,141 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Plant</title>
-    <link rel="stylesheet" href="../assets/css/styles.css">
-    <link rel="stylesheet" href="../assets/css/add-plant.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
     <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-    <script src="../assets/js/notifications.js"></script>
-    <script type="module" src="../assets/js/addPlant.js" defer></script>
-    <script type="module" src="../assets/js/addTask.js" defer></script>
-    <script type="module">
-        import { logout } from '../assets/js/logout.js';
-        window.logout = logout;
-    </script>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <style>
+        .main-container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            margin-top: 10px; /* Reduce the top margin */
+        }
+
+        .table-container {
+            width: 1200px;
+            flex: 4; /* 80% of the space */
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .form-container {
+            flex: 1; /* 20% of the space */
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .table-container h2, .form-container h2 {
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #f2f2f2;
+        }
+
+        button[type="submit"] {
+            background-color: #6a994e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #5c8a42;
+        }
+    </style>
 </head>
 <body>
     <nav>
         <ul>
-            <li><a href="/pages/calendar.html">Calendar</a></li>
-            <li><a href="/pages/add-plant.html">Add Plant</a></li>
-            <li><a href="/pages/add-user.html">Add User</a></li>
-            <li><a href="/pages/settings.html">Settings</a></li>
+            <li><a href="./calendar.html">Calendar</a></li>
+            <li><a href="./add-plant.html">Add Plant</a></li>
+            <li><a href="./add-user.html">Add User</a></li>
+            <li><a href="./settings.html">Settings</a></li>
             <li><a href="#" onclick="logout()">Logout</a></li>
         </ul>
     </nav>
-    <div class="form-container">
-        <h2>Add New Plant</h2>
-        <form id="add-plant-form">
-            <label for="plant-name">Plant Name:</label>
-            <input type="text" id="plant-name" name="plant-name" required>
-            
-            <label for="species">Species:</label>
-            <input type="text" id="species" name="species" required>
-            
-            <label for="room">Room:</label>
-            <input type="text" id="room" name="room" required>
-            
-            <label for="task">Task Description:</label>
-            <input type="text" id="task" name="task" required>
-            
-            <label for="date">Task Date:</label>
-            <input type="date" id="date" name="date" required>
-            
-            <label for="time">Task Time:</label>
-            <input type="time" id="time" name="time" required>
-            
-            <label for="images">Upload Images:</label>
-            <input type="file" id="images" name="images" multiple accept="image/*">
-            
-            <button type="submit">Add Plant</button>
-        </form>
-    </div>
-    <div class="plant-table-container">
-        <h3>Existing Plants</h3>
-        <table id="plant-table" class="display">
-            <thead>
-                <tr>
-                    <th>Plant Name</th>
-                    <th>Species</th>
-                    <th>Room</th>
-                    <th>Task</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Data will be dynamically loaded via DataTables -->
-            </tbody>
-        </table>
-        <div style="margin-top: 10px;">
-            <input type="checkbox" id="include-me" name="include-me">
-            <label for="include-me">Include me in the task</label>
+    <div class="main-container">
+        <!-- Left: Table for Plants -->
+        <div class="table-container">
+            <h2>Plants</h2>
+            <table id="plants-table">
+                <thead>
+                    <tr>
+                        <th>Plant Name</th>
+                        <th>Type</th>
+                        <th>Location</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows will be dynamically populated -->
+                </tbody>
+            </table>
         </div>
-        <button id="create-task-btn" class="settings-btn" style="margin-top: 10px;">Create Task</button>
-    </div>
-    <div id="task-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <h2>Create Task</h2>
-            <form id="task-form">
-                <label for="task-plant-id">Plant ID:</label>
-                <input type="text" id="task-plant-id" name="task-plant-id" required>
 
-                <label for="task-description">Task Description:</label>
-                <input type="text" id="task-description" name="task-description" required>
+        <!-- Right: Form for Creating New Plant -->
+        <div class="form-container">
+            <h2>Create New Plant</h2>
+            <form id="plant-add-form" style="display: flex; flex-direction: column; gap: 15px;">
+                <label for="plant-name">Plant Name:</label>
+                <input type="text" id="plant-name" name="plant-name" required>
 
-                <label for="task-emails">Emails (comma-separated):</label>
-                <input type="text" id="task-emails" name="task-emails" required>
+                <label for="plant-type">Plant Type:</label>
+                <input type="text" id="plant-type" name="plant-type" required>
 
-                <label for="task-finish-days">Number of Days to Finish:</label>
-                <input type="number" id="task-finish-days" name="task-finish-days" required>
+                <label for="plant-location">Location:</label>
+                <input type="text" id="plant-location" name="plant-location" required>
 
-                <div>
-                    <input type="checkbox" id="task-include-me" name="task-include-me">
-                    <label for="task-include-me">Include me in the task</label>
-                </div>
+                <label for="plant-description">Description:</label>
+                <textarea id="plant-description" name="plant-description" rows="3" required></textarea>
 
-                <button type="submit">Create Task</button>
-                <button type="button" id="close-task-modal">Cancel</button>
+                <label for="assigned-users">Assigned Users:</label>
+                <input type="text" id="assigned-users" name="assigned-users" placeholder="Comma-separated emails" required>
+
+                <button type="submit">Add Plant</button>
             </form>
         </div>
     </div>
+    <script>
+        // Example: Populate table dynamically
+        const plantsTableBody = document.querySelector('#plants-table tbody');
+        const plants = [
+            { name: 'Fern', type: 'Indoor', location: 'Living Room' },
+            { name: 'Cactus', type: 'Succulent', location: 'Office' }
+        ];
+
+        plants.forEach(plant => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${plant.name}</td>
+                <td>${plant.type}</td>
+                <td>${plant.location}</td>
+                <td><button onclick="viewDetails('${plant.name}')">Details</button></td>
+            `;
+            plantsTableBody.appendChild(row);
+        });
+
+        function viewDetails(plantName) {
+            alert(`Viewing details for: ${plantName}`);
+        }
+    </script>
 </body>
 </html>
