@@ -6,6 +6,12 @@
     <title>Add Plant</title>
     <link rel="icon" href="../assets/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="../assets/js/notifications.js"></script>
+    <script type="module">
+        import { logout } from '../assets/js/logout.js';
+        window.logout = logout;
+    </script>
     <style>
         .main-container {
             display: flex;
@@ -46,10 +52,6 @@
             text-align: left;
         }
 
-        table th {
-            background-color: #f2f2f2;
-        }
-
         button[type="submit"] {
             background-color: #6a994e;
             color: white;
@@ -79,11 +81,11 @@
         <!-- Left: Table for Plants -->
         <div class="table-container">
             <h2>Plants</h2>
-            <table id="plants-table">
+            <table id="plants-table" class="display">
                 <thead>
                     <tr>
                         <th>Plant Name</th>
-                        <th>Type</th>
+                        <th>Plant Type</th>
                         <th>Location</th>
                         <th>Actions</th>
                     </tr>
@@ -110,35 +112,12 @@
                 <label for="plant-description">Description:</label>
                 <textarea id="plant-description" name="plant-description" rows="3" required></textarea>
 
-                <label for="assigned-users">Assigned Users:</label>
-                <input type="text" id="assigned-users" name="assigned-users" placeholder="Comma-separated emails" required>
-
                 <button type="submit">Add Plant</button>
             </form>
         </div>
     </div>
-    <script>
-        // Example: Populate table dynamically
-        const plantsTableBody = document.querySelector('#plants-table tbody');
-        const plants = [
-            { name: 'Fern', type: 'Indoor', location: 'Living Room' },
-            { name: 'Cactus', type: 'Succulent', location: 'Office' }
-        ];
-
-        plants.forEach(plant => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${plant.name}</td>
-                <td>${plant.type}</td>
-                <td>${plant.location}</td>
-                <td><button onclick="viewDetails('${plant.name}')">Details</button></td>
-            `;
-            plantsTableBody.appendChild(row);
-        });
-
-        function viewDetails(plantName) {
-            alert(`Viewing details for: ${plantName}`);
-        }
-    </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="../assets/js/addTaskAndPlant.js" type="module"></script>
 </body>
 </html>

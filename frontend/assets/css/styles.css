@@ -398,3 +398,32 @@ table tr:hover {
 #finish-tasks-btn:hover {
     background-color: #5c8a42;
 }
+
+.forms-container {
+    display: flex;
+    flex-direction: column; /* Stack forms vertically */
+    gap: 20px; /* Add spacing between the forms */
+    align-items: center; /* Center the forms horizontally */
+    margin-top: 20px; /* Add some spacing above the forms */
+}
+
+.forms-container form {
+    width: 100%; /* Make the form take full width */
+    max-width: 400px; /* Limit the maximum width */
+    padding: 20px; /* Add padding for better spacing inside the forms */
+    border: 1px solid #ddd; /* Add a border for better visibility */
+    border-radius: 8px; /* Round the corners */
+    background-color: #ffffff; /* Ensure a white background */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+}
+
+.forms-container form .settings-btn {
+    width: 100%; /* Make the button span the full width of the form */
+}
+
+.forms-container form label {
+    display: inline-block; /* Ensure labels behave like block elements */
+    width: 150px; /* Set a consistent width for all labels */
+    text-align: right; /* Align text to the right for better alignment with inputs */
+    margin-right: 10px; /* Add spacing between the label and input */
+}

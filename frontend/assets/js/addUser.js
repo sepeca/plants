@@ -1,6 +1,23 @@
 import { SERVER_ADDRESS } from './config.js'; // Import server address
 
-checkLoginStatus();
+const token = localStorage.getItem('jwt');
+
+if (!token) {
+    console.error('Authentication token is missing. Please log in again.');
+    window.location.href = './login.html';
+}
+
+
+
+
+// user should be shown error message that he doesnt have permission to access this page when get is called and he will get moved to calendar
+
+
+
+
+
+
+
 
 $(document).ready(function () {
     const table = $('#user-table').DataTable({
