@@ -1,7 +1,7 @@
 // Check if user is already logged in
 function checkLoginStatus() {
-    if (document.cookie.includes('authToken=')) {
-        window.location.href = '/pages/calendar.html'; // Redirect to calendar if logged in
+    if (document.cookie.includes('jwt=')) {
+        window.location.href = './calendar.html'; // Redirect to calendar if logged in
     }
 }
 
@@ -14,7 +14,7 @@ document.getElementById('login-form').addEventListener('submit', async function(
     const password = document.getElementById('password').value;
 
     try {
-        const response = await fetch('http://localhost:8081/login', { // Use full URL with port 8081
+        const response = await fetch('http://192.168.192.1:8081/login', { // Use full URL with port 8081
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password }), // Send email and password
@@ -22,10 +22,9 @@ document.getElementById('login-form').addEventListener('submit', async function(
         });
 
         if (response.ok) {
-            const data = await response.json();
-            document.cookie = `authToken=${data.token}; max-age=7200; path=/`; // Auth token valid for 2 hours
+            console.log('Set-Cookie header received:', response.headers.get('Set-Cookie')); // Debug log
             showNotification('Login successful!', true);
-            window.location.href = './calendar.html'; // Redirect to calendar
+            //window.location.href = './calendar.html'; // Redirect to calendar
         } else {
             showNotification('Invalid email or password.', false); // Show error notification
         }
