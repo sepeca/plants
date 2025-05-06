@@ -61,8 +61,8 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="../assets/js/notifications.js"></script>
-    <script src="../assets/js/checkAdminAccess.js" defer></script>
     <script src="../assets/js/addPlant.js" defer></script>
+    <script src="../assets/js/addTask.js" defer></script>
 </head>
 <body>
     <div class="logout">
@@ -112,6 +112,37 @@
                 <!-- Data will be dynamically loaded via DataTables -->
             </tbody>
         </table>
+        <div style="margin-top: 10px;">
+            <input type="checkbox" id="include-me" name="include-me">
+            <label for="include-me">Include me in the task</label>
+        </div>
+        <button id="create-task-btn" class="settings-btn" style="margin-top: 10px;">Create Task</button>
+    </div>
+    <div id="task-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Create Task</h2>
+            <form id="task-form">
+                <label for="task-plant-id">Plant ID:</label>
+                <input type="text" id="task-plant-id" name="task-plant-id" required>
+
+                <label for="task-description">Task Description:</label>
+                <input type="text" id="task-description" name="task-description" required>
+
+                <label for="task-emails">Emails (comma-separated):</label>
+                <input type="text" id="task-emails" name="task-emails" required>
+
+                <label for="task-finish-days">Number of Days to Finish:</label>
+                <input type="number" id="task-finish-days" name="task-finish-days" required>
+
+                <div>
+                    <input type="checkbox" id="task-include-me" name="task-include-me">
+                    <label for="task-include-me">Include me in the task</label>
+                </div>
+
+                <button type="submit">Create Task</button>
+                <button type="button" id="close-task-modal">Cancel</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>

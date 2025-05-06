@@ -21,6 +21,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
         const data = await response.json();
 
         if (data.status === "success") {
+            document.cookie = `authToken=${data.token}; max-age=7200; path=/`; // Store token as a cookie
             window.location.href = '/pages/calendar.html'; // Redirect to calendar
         } else {
             alert(`Registration failed: ${data.message || 'Unknown error'}`);
