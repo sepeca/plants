@@ -62,7 +62,7 @@ $(document).ready(async function () {
         }
     }
 
-    async function submitPlant(plantName, plantType, plantLocation, plantDescription) {
+    async function submitPlant(plantName, species, locationName, categoryName, humidity, lightRequirements, water, temperatureRange, imageUrls) {
         try {
             const response = await fetch(`${SERVER_ADDRESS}/api/create_plant`, {
                 method: 'POST',
@@ -71,10 +71,15 @@ $(document).ready(async function () {
                     Authorization: `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    name: plantName,
-                    type: plantType,
-                    location: plantLocation,
-                    description: plantDescription
+                    plantName,
+                    species,
+                    locationName,
+                    categoryName,
+                    humidity,
+                    lightRequirements,
+                    water,
+                    temperatureRange,
+                    imageUrls
                 })
             });
             if (!response.ok) throw new Error('Failed to create plant');
@@ -160,32 +165,55 @@ $(document).ready(async function () {
     document.querySelector('#plant-add-form').addEventListener('submit', async (event) => {
         event.preventDefault();
         const plantName = document.querySelector('#plant-name').value.trim();
-        const plantType = document.querySelector('#plant-type').value.trim();
-        const plantLocation = document.querySelector('#plant-location').value.trim();
-        const plantDescription = document.querySelector('#plant-description').value.trim();
+        const species = document.querySelector('#species').value.trim();
+        const locationName = document.querySelector('#location-name').value.trim();
+        const categoryName = document.querySelector('#category-name').value.trim();
+        const humidity = document.querySelector('#humidity').value.trim();
+        const lightRequirements = document.querySelector('#light-requirements').value.trim();
+        const water = document.querySelector('#water').value.trim();
+        const temperatureRange = document.querySelector('#temperature-range').value.trim();
+        const imageUrls = document.querySelector('#image-urls').value
+            .split(',')
+            .map(url => url.trim())
+            .filter(url => url);
 
-        if (!plantName || !plantType || !plantLocation || !plantDescription) {
-            alert('All fields must be filled in to create a new plant.');
+        if (!plantName || !species || !locationName || !categoryName || !humidity || !lightRequirements || !water || !temperatureRange || imageUrls.length === 0) {
+            alert('All fields are required, and at least one image URL must be provided.');
             return;
         }
 
-        await submitPlant(plantName, plantType, plantLocation, plantDescription);
+        await submitPlant(plantName, species, locationName, categoryName, humidity, lightRequirements, water, temperatureRange, imageUrls);
     });
 
     // Update the form HTML
     document.querySelector('#plant-add-form').innerHTML = `
         <label for="plant-name">Plant Name:</label>
         <input type="text" id="plant-name" name="plant-name" required>
-        
-        <label for="plant-type">Plant Type:</label>
-        <input type="text" id="plant-type" name="plant-type" required>
-        
-        <label for="plant-location">Location:</label>
-        <input type="text" id="plant-location" name="plant-location" required>
-        
-        <label for="plant-description">Plant Info:</label> <!-- Updated label text -->
-        <textarea id="plant-description" name="plant-description" rows="3" required></textarea>
-        
+
+        <label for="species">Species:</label>
+        <input type="text" id="species" name="species" required>
+
+        <label for="location-name">Location:</label>
+        <input type="text" id="location-name" name="location-name" required>
+
+        <label for="category-name">Category:</label>
+        <input type="text" id="category-name" name="category-name" required>
+
+        <label for="humidity">Humidity:</label>
+        <input type="text" id="humidity" name="humidity" required>
+
+        <label for="light-requirements">Light Requirements:</label>
+        <input type="text" id="light-requirements" name="light-requirements" required>
+
+        <label for="water">Water:</label>
+        <input type="text" id="water" name="water" required>
+
+        <label for="temperature-range">Temperature Range:</label>
+        <input type="text" id="temperature-range" name="temperature-range" required>
+
+        <label for="image-urls">Image URLs (comma-separated):</label>
+        <textarea id="image-urls" name="image-urls" rows="3" required></textarea>
+
         <button type="submit" style="background-color: #6a994e; color: white; border: none; padding: 10px 20px; font-size: 1em; border-radius: 5px; cursor: pointer;">Add Plant</button>
     `;
 
