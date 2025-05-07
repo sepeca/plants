@@ -67,7 +67,7 @@ $(document).ready(async function () {
     async function toggleAdmin(userId, isAdmin) {
         try {
             const response = await fetch(`${SERVER_ADDRESS}/api/toggle_admin`, {
-                method: 'POST',
+                method: 'PUT', // Changed from POST to PUT
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
