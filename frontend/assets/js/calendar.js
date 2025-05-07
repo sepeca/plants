@@ -19,21 +19,11 @@ $(document).ready(async function () {
 
         if (response.ok) {
             let tasks = await response.json();
-            console.log('Tasks response:', tasks); // Log the response for debugging
 
-            // Ensure all tasks have 'plantSpecies' and 'location' properties
             tasks = tasks.map(task => {
-                if (!task.plantSpecies) {
-                    console.warn(`Task with ID ${task.id} is missing the 'plantSpecies' property.`);
-                }
-                if (!task.location) {
-                    console.warn(`Task with ID ${task.id} is missing the 'location' property.`);
-                }
-                return {
-                    ...task,
-                    plantSpecies: task.plantSpecies || 'Unknown', // Default value for 'plantSpecies'
-                    location: task.location || 'Unknown' // Default value for 'location'
-                };
+                task.plantSpecies = task.plantSpecies;
+                task.locationName = task.locationName;
+                return task;
             });
 
             const table = $('#plant-tasks').DataTable({
@@ -50,14 +40,14 @@ $(document).ready(async function () {
                         data: 'taskDate',
                         render: function (data, type, row) {
                             if (type === 'display' || type === 'filter') {
-                                return data.split('T')[0]; // Extract only the date part (YYYY-MM-DD)
+                                return data.split('T')[0];
                             }
-                            return data; // Return original data for other types
+                            return data;
                         }
                     },
                     { data: 'plantName' },
-                    { data: 'plantSpecies' }, // Updated column to use 'plantSpecies'
-                    { data: 'location' },
+                    { data: 'plantSpecies' },
+                    { data: 'locationName' },
                     {
                         data: null,
                         render: function (data, type, row) {
@@ -72,7 +62,7 @@ $(document).ready(async function () {
                     if (isPast) {
                         $(row).css({
                             'background-color': 'red',
-                            'color': 'white' // Set text color to white for better readability
+                            'color': 'white'
                         });
                     }
                 },
@@ -80,7 +70,7 @@ $(document).ready(async function () {
                 scrollY: '400px',
                 scrollCollapse: true,
                 scroller: true,
-                order: [[1, 'asc']] // Sort by the "Task Date" column (index 1) in ascending order
+                order: [[1, 'asc']]
             });
 
             $('#plant-tasks tbody').on('click', '.details-btn', function () {
@@ -154,6 +144,5 @@ $(document).ready(async function () {
             console.error('Error finishing tasks:', error);
         }
     });
-
 
 });
