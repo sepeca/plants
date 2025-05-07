@@ -9,7 +9,6 @@ if (!token) {
 
 const plantsTableBody = document.querySelector('#plants-table tbody');
 
-// Fetch plants from the API and populate the table
 async function fetchPlants() {
     try {
         const response = await fetch(`${SERVER_ADDRESS}/api/get_plants`, {

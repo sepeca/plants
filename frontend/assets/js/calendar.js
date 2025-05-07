@@ -21,17 +21,17 @@ $(document).ready(async function () {
             let tasks = await response.json();
             console.log('Tasks response:', tasks); // Log the response for debugging
 
-            // Ensure all tasks have 'type' and 'location' properties
+            // Ensure all tasks have 'plantSpecies' and 'location' properties
             tasks = tasks.map(task => {
-                if (!task.type) {
-                    console.warn(`Task with ID ${task.id} is missing the 'type' property.`);
+                if (!task.plantSpecies) {
+                    console.warn(`Task with ID ${task.id} is missing the 'plantSpecies' property.`);
                 }
                 if (!task.location) {
                     console.warn(`Task with ID ${task.id} is missing the 'location' property.`);
                 }
                 return {
                     ...task,
-                    type: task.type || 'Unknown', // Default value for 'type'
+                    plantSpecies: task.plantSpecies || 'Unknown', // Default value for 'plantSpecies'
                     location: task.location || 'Unknown' // Default value for 'location'
                 };
             });
@@ -56,7 +56,7 @@ $(document).ready(async function () {
                         }
                     },
                     { data: 'plantName' },
-                    { data: 'type' },
+                    { data: 'plantSpecies' }, // Updated column to use 'plantSpecies'
                     { data: 'location' },
                     {
                         data: null,
