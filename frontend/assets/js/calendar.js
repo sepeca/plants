@@ -100,7 +100,7 @@ $(document).ready(async function () {
 
         // Populate and show the container for the new task
         detailContent.html(`
-            <p><strong>Description:</strong> ${data.description || 'No description available.'}</p>
+            <p><strong>Description:</strong> ${data.taskDescription || 'No description available.'}</p> <!-- Updated to use taskDescription -->
             <p><strong>Assigned Users:</strong></p>
             <ul>
                 ${data.assignedUsers?.map(user => `<li>${user}</li>`).join('') || '<li>No users assigned.</li>'}

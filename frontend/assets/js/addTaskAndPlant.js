@@ -172,6 +172,23 @@ $(document).ready(async function () {
         await submitPlant(plantName, plantType, plantLocation, plantDescription);
     });
 
+    // Update the form HTML
+    document.querySelector('#plant-add-form').innerHTML = `
+        <label for="plant-name">Plant Name:</label>
+        <input type="text" id="plant-name" name="plant-name" required>
+        
+        <label for="plant-type">Plant Type:</label>
+        <input type="text" id="plant-type" name="plant-type" required>
+        
+        <label for="plant-location">Location:</label>
+        <input type="text" id="plant-location" name="plant-location" required>
+        
+        <label for="plant-description">Plant Info:</label> <!-- Updated label text -->
+        <textarea id="plant-description" name="plant-description" rows="3" required></textarea>
+        
+        <button type="submit" style="background-color: #6a994e; color: white; border: none; padding: 10px 20px; font-size: 1em; border-radius: 5px; cursor: pointer;">Add Plant</button>
+    `;
+
     window.createTask = function(plantName, button) {
         const parentRow = button.closest('tr');
         let taskRow = parentRow.nextElementSibling;
