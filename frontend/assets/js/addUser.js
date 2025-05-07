@@ -1,149 +1,177 @@
 import { SERVER_ADDRESS } from './config.js';
 import { checkAuthAndRedirect } from './auth.js';
 
-const token = checkAuthAndRedirect();
-if (!token) return;
+$(document).ready(async function () {
+    const token = checkAuthAndRedirect();
+    if (!token) return;
 
+    const userTableBody = document.querySelector('#user-table tbody');
 
+    if (!userTableBody) {
+        console.error('User table not found.');
+        return;
+    }
 
+    async function fetchUsers() {
+        try {
+            const response = await fetch(`${SERVER_ADDRESS}/api/get_users`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
 
-
-// user should be shown error message that he doesnt have permission to access this page when get is called and he will get moved to calendar
-
-
-
-
-
-$(document).ready(function () {
-    const table = $('#user-table').DataTable({
-        ajax: {
-            url: `${SERVER_ADDRESS}/api/get_users`, // Use centralized server address
-            dataSrc: ''
-        },
-        columns: [
-            {
-                data: null,
-                render: function (data, type, row) {
-                    return `<input type="checkbox" class="user-select" data-id="${row.id}">`;
-                },
-                orderable: false
-            },
-            { data: 'username' },
-            { data: 'email' },
-            {
-                data: 'isAdmin',
-                render: function (data) {
-                    return data ? 'Admin' : 'User';
-                }
-            },
-            {
-                data: null,
-                render: function (data, type, row) {
-                    const toggleAdminButton = `
-                        <button class="toggle-admin-btn" data-id="${row.id}" data-is-admin="${row.isAdmin}">
-                            ${row.isAdmin ? 'Revoke Admin' : 'Make Admin'}
-                        </button>`;
-                    const deleteButton = row.isAdmin
-                        ? '' // Do not show delete button for admins
-                        : `<button class="delete-btn" data-id="${row.id}">Delete</button>`;
-                    return `${toggleAdminButton} ${deleteButton}`;
-                }
+            if (!response.ok) {
+                alert('You do not have permission to access this page.');
+                window.location.href = './calendar.html';
+                return;
             }
-        ],
-        pageLength: 10,
-        scrollY: '400px',
-        scrollCollapse: true,
-        scroller: true
+
+            const users = await response.json();
+            users.forEach(user => {
+                const row = `
+                    <tr>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td>${user.admin ? 'Admin' : 'User'}</td>
+                        <td>
+                            <button class="toggle-admin-btn" data-id="${user.userId}" data-is-admin="${user.admin}">
+                                ${user.admin ? 'Revoke Admin' : 'Make Admin'}
+                            </button>
+                            <button class="delete-btn" data-id="${user.userId}">Delete</button>
+                        </td>
+                    </tr>
+                `;
+                userTableBody.insertAdjacentHTML('beforeend', row);
+            });
+
+            // Initialize DataTable after rows are inserted
+            if ($.fn.DataTable.isDataTable('#user-table')) {
+                $('#user-table').DataTable().destroy();
+            }
+            $('#user-table').DataTable({
+                autoWidth: false,
+                columns: [
+                    { width: '20%' }, // Username
+                    { width: '40%' }, // Email
+                    { width: '20%' }, // Role
+                    { width: '20%' }  // Actions
+                ],
+                scrollY: '400px',
+                scrollCollapse: true,
+                scroller: true,
+                pageLength: 15
+            });
+        } catch (error) {
+            console.error('Error fetching users:', error.message);
+        }
+    }
+
+    async function toggleAdmin(userId, isAdmin) {
+        try {
+            const response = await fetch(`${SERVER_ADDRESS}/api/toggle_admin`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ userId, isAdmin })
+            });
+
+            if (response.ok) {
+                alert('User role updated successfully!');
+                location.reload(); // Reload the page to update the table
+            } else {
+                const errorData = await response.json();
+                alert(`Failed to update user role: ${errorData.message || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error('Error toggling admin role:', error.message);
+            alert('An error occurred. Please try again later.');
+        }
+    }
+
+    async function deleteUser(userIds) {
+        try {
+            const response = await fetch(`${SERVER_ADDRESS}/api/delete_users`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ userIds })
+            });
+
+            if (response.ok) {
+                alert('User(s) deleted successfully!');
+                location.reload(); // Reload the page to update the table
+            } else {
+                const errorData = await response.json();
+                alert(`Failed to delete user(s): ${errorData.message || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error('Error deleting user(s):', error.message);
+            alert('An error occurred. Please try again later.');
+        }
+    }
+
+    // Fetch users from the API
+    fetchUsers();
+
+    // Event listener for "Toggle Admin" button
+    $(document).on('click', '.toggle-admin-btn', function () {
+        const userId = $(this).data('id');
+        const isAdmin = !$(this).data('is-admin'); // Toggle the admin status
+        const action = isAdmin ? 'Make Admin' : 'Revoke Admin';
+
+        if (confirm(`Do you want to proceed with action: ${action} for this user?`)) {
+            if (confirm('Last chance. Are you sure?')) {
+                toggleAdmin(userId, isAdmin);
+            }
+        }
     });
 
-    $('#add-user-form').on('submit', async function (event) {
-        event.preventDefault();
-        const username = $('#username').val();
-        const email = $('#email').val();
-        let password = $('#password').val();
-        const isAdmin = $('#is-admin').is(':checked');
+    // Event listener for "Delete" button
+    $(document).on('click', '.delete-btn', function () {
+        const userId = $(this).data('id');
 
-        if (!password) {
-            password = generatePassword();
+        if (confirm(`Do you want to proceed with action: Removing this user?`)) {
+            if (confirm('Last chance. Are you sure?')) {
+                deleteUser([userId]);
+            }
+        }
+    });
+
+    // Handle form submission for adding a new user
+    document.querySelector('#add-user-form').addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const username = document.querySelector('#username').value.trim();
+        const email = document.querySelector('#email').value.trim();
+        const password = document.querySelector('#password').value.trim();
+        const isAdmin = document.querySelector('#is-admin').checked;
+
+        if (!username || !email || !password) {
+            alert('All fields are required.');
+            return;
         }
 
         try {
             const response = await fetch(`${SERVER_ADDRESS}/api/add_user`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
                 body: JSON.stringify({ username, email, password, isAdmin })
             });
 
             if (response.ok) {
-                alert('User added successfully.');
-                $('#add-user-form')[0].reset();
-                table.ajax.reload(); // Reload table data
+                alert('User added successfully!');
+                location.reload(); // Reload the page to update the table
             } else {
-                alert('Failed to add user. Please try again.');
+                const errorData = await response.json();
+                alert(`Failed to add user: ${errorData.message || 'Unknown error'}`);
             }
         } catch (error) {
-            console.error('Error adding user:', error);
+            console.error('Error adding user:', error.message);
             alert('An error occurred. Please try again later.');
         }
     });
-
-    $('#delete-selected-users-btn').on('click', async function () {
-        const selectedUsers = [];
-        $('.user-select:checked').each(function () {
-            selectedUsers.push($(this).data('id'));
-        });
-
-        if (selectedUsers.length === 0) {
-            alert('No users selected.');
-            return;
-        }
-
-        if (!confirm('Are you sure you want to delete the selected users? This action cannot be undone.')) {
-            return;
-        }
-
-        try {
-            const response = await fetch(`${SERVER_ADDRESS}/api/delete_users`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userIds: selectedUsers })
-            });
-
-            if (response.ok) {
-                alert('Selected users deleted successfully.');
-                table.ajax.reload(); // Reload table data
-            } else {
-                alert('Failed to delete users. Please try again.');
-            }
-        } catch (error) {
-            console.error('Error deleting users:', error);
-            alert('An error occurred. Please try again later.');
-        }
-    });
-
-    $('#user-table').on('click', '.toggle-admin-btn', async function () {
-        const userId = $(this).data('id');
-        const isAdmin = $(this).data('is-admin');
-        try {
-            const response = await fetch(`${SERVER_ADDRESS}/api/toggle_admin`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, isAdmin: !isAdmin })
-            });
-
-            if (response.ok) {
-                alert('User role updated successfully.');
-                table.ajax.reload(); // Reload table data
-            } else {
-                alert('Failed to update user role. Please try again.');
-            }
-        } catch (error) {
-            console.error('Error updating user role:', error);
-            alert('An error occurred. Please try again later.');
-        }
-    });
-
-    function generatePassword() {
-        return Math.random().toString(36).slice(-8);
-    }
 });

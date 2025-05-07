@@ -258,6 +258,20 @@ table tr:hover {
     text-align: left;
 }
 
+#user-table {
+    width: 100%; /* Ensure the table spans the container */
+}
+
+#user-table th:nth-child(2), #user-table td:nth-child(2) {
+    width: 40%; /* Email column */
+}
+
+#user-table th:nth-child(1), #user-table td:nth-child(1),
+#user-table th:nth-child(3), #user-table td:nth-child(3),
+#user-table th:nth-child(4), #user-table td:nth-child(4) {
+    width: 20%; /* Other columns */
+}
+
 .add-user-btn {
     display: block;
     width: 100%;
@@ -426,4 +440,45 @@ table tr:hover {
     width: 150px; /* Set a consistent width for all labels */
     text-align: right; /* Align text to the right for better alignment with inputs */
     margin-right: 10px; /* Add spacing between the label and input */
+}
+
+.main-container {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    margin-top: 10px;
+}
+
+.table-container {
+    flex: 4;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.form-container {
+    flex: 1;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.table-container h2, .form-container h2 {
+    margin-bottom: 15px;
+}
+
+button[type="submit"] {
+    background-color: #6a994e;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button[type="submit"]:hover {
+    background-color: #5c8a42;
 }
