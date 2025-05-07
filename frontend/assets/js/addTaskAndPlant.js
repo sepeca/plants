@@ -19,13 +19,13 @@ $(document).ready(async function () {
 
             plants.forEach(plant => {
                 const row = `
-                    <tr>
-                        <td>${plant.name}</td>
-                        <td>${plant.plantCategory.name}</td>
-                        <td>${plant.location.name}</td>
+                    <tr data-plant-id="${plant.plantId}">
+                        <td>${plant.platName}</td> <!-- Updated to use platName -->
+                        <td>${plant.locationName}</td>
+                        <td>${plant.categoryName}</td>
                         <td>
-                            <button onclick="viewDetails('${plant.name}', ${JSON.stringify(plant).replace(/"/g, '&quot;')})">Details</button>
-                            <button onclick="createTask('${plant.name}', this)">Create Task</button>
+                            <button onclick="viewDetails(${plant.plantId})">Details</button>
+                            <button onclick="createTask('${plant.platName}', this)">Create Task</button> <!-- Updated to use platName -->
                         </td>
                     </tr>
                 `;
@@ -82,6 +82,82 @@ $(document).ready(async function () {
             location.reload(); // Reload the page to update the table
         } catch (error) {
             console.error('Error creating plant:', error.message);
+        }
+    }
+
+    async function fetchPlantDetails(plantId) {
+        try {
+            console.log('Fetching plant details for plantId:', plantId); // Debugging log
+            const response = await fetch(`${SERVER_ADDRESS}/api/plant_detail`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ plantId })
+            });
+
+            if (!response.ok) {
+                console.error('Server responded with status:', response.status); // Log server response status
+                throw new Error('Failed to fetch plant details');
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching plant details:', error.message);
+            throw error;
+        }
+    }
+
+    async function fetchCareHistory(plantId) {
+        try {
+            console.log('Fetching care history for plantId:', plantId); // Debugging log
+            const response = await fetch(`${SERVER_ADDRESS}/api/careHistory`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ plantId })
+            });
+
+            if (!response.ok) {
+                console.error('Server responded with status:', response.status); // Log server response status
+                throw new Error('Failed to fetch care history');
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching care history:', error.message);
+            throw error;
+        }
+    }
+
+    async function fetchCareTypes() {
+        try {
+            const response = await fetch(`${SERVER_ADDRESS}/api/care_types`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error('Failed to fetch care types');
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching care types:', error.message);
+            throw error;
+        }
+    }
+
+    async function submitCareHistory(plantId, careTypeId, notes, image) {
+        try {
+            const response = await fetch(`${SERVER_ADDRESS}/api/care_history`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ plantId, careTypeId, notes, image })
+            });
+            if (!response.ok) throw new Error('Failed to create care history');
+            alert('Care history entry created successfully!');
+        } catch (error) {
+            console.error('Error creating care history:', error.message);
         }
     }
 
@@ -152,26 +228,78 @@ $(document).ready(async function () {
 
     fetchPlants();
 
-    window.viewDetails = function(plantName, plantData) {
-        const parentRow = [...plantsTableBody.rows].find(row => row.cells[0].textContent === plantName);
+    window.viewDetails = async function (plantId) {
+        const parentRow = [...plantsTableBody.rows].find(row => row.dataset.plantId == plantId);
         let detailsRow = parentRow.nextElementSibling;
 
         if (detailsRow && detailsRow.classList.contains('details-row')) {
             detailsRow.remove();
         } else {
-            detailsRow = document.createElement('tr');
-            detailsRow.classList.add('details-row');
-            detailsRow.innerHTML = `
-                <td colspan="4" style="background-color: #f9f9f9; padding: 15px;">
-                    <p><strong>Description:</strong> ${plantData.description || 'No description available.'}</p>
-                    <p><strong>Species:</strong> ${plantData.species}</p>
-                    <p><strong>Humidity:</strong> ${plantData.plantInfo.humidity}</p>
-                    <p><strong>Light Requirements:</strong> ${plantData.plantInfo.lightRequirements}</p>
-                    <p><strong>Water:</strong> ${plantData.plantInfo.water}</p>
-                    <p><strong>Temperature Range:</strong> ${plantData.plantInfo.temperatureRange}</p>
-                </td>
-            `;
-            parentRow.insertAdjacentElement('afterend', detailsRow);
+            try {
+                const [plantDetails, careHistory, careTypes] = await Promise.all([
+                    fetchPlantDetails(plantId),
+                    fetchCareHistory(plantId),
+                    fetchCareTypes()
+                ]);
+
+                detailsRow = document.createElement('tr');
+                detailsRow.classList.add('details-row');
+                detailsRow.innerHTML = `
+                    <td colspan="4" style="background-color: #f9f9f9; padding: 15px;">
+                        <h3>Plant Details</h3>
+                        <p><strong>Name:</strong> ${plantDetails.plantName}</p>
+                        <p><strong>Species:</strong> ${plantDetails.species}</p>
+                        <p><strong>Humidity:</strong> ${plantDetails.humidity}</p>
+                        <p><strong>Light Requirements:</strong> ${plantDetails.lightRequirements}</p>
+                        <p><strong>Water:</strong> ${plantDetails.water}</p>
+                        <p><strong>Temperature Range:</strong> ${plantDetails.temperatureRange}</p>
+                        ${plantDetails.imageUrls?.length ? `<p><strong>Images:</strong> ${plantDetails.imageUrls.map(url => `<a href="${url}" target="_blank">View</a>`).join(', ')}</p>` : ''}
+                        
+                        <h3>Care History</h3>
+                        <ul>
+                            ${careHistory
+                                .sort((a, b) => new Date(b.careDate) - new Date(a.careDate))
+                                .map(history => `
+                                    <li>
+                                        <p><strong>Date:</strong> ${history.careDate.split('T')[0]}</p>
+                                        <p><strong>Type:</strong> ${careTypes.find(type => type.careTypeId === history.careTypeId)?.name || 'Unknown'}</p>
+                                        <p><strong>Notes:</strong> ${history.notes || 'No notes provided'}</p>
+                                        <p><strong>User:</strong> ${history.userName} (${history.userEmail})</p>
+                                        ${history.imageUrl ? `<p><strong>Image:</strong> <a href="${history.imageUrl}" target="_blank">View</a></p>` : ''}
+                                    </li>
+                                `).join('')}
+                        </ul>
+
+                        <h3>Add Care History</h3>
+                        <form id="care-history-form-${plantId}" style="display: flex; flex-direction: column; gap: 10px;">
+                            <label>Care Type:</label>
+                            ${careTypes.map(type => `
+                                <label>
+                                    <input type="radio" name="careTypeId" value="${type.careTypeId}" required>
+                                    ${type.name}
+                                </label>
+                            `).join('')}
+                            <label for="notes-${plantId}">Notes:</label>
+                            <textarea id="notes-${plantId}" name="notes" rows="3"></textarea>
+                            <label for="image-${plantId}">Image URL:</label>
+                            <input type="text" id="image-${plantId}" name="image">
+                            <button type="submit" style="background-color: #6a994e; color: white; border: none; padding: 10px 20px; font-size: 1em; border-radius: 5px; cursor: pointer;">Submit</button>
+                        </form>
+                    </td>
+                `;
+                parentRow.insertAdjacentElement('afterend', detailsRow);
+
+                document.querySelector(`#care-history-form-${plantId}`).addEventListener('submit', async function (event) {
+                    event.preventDefault();
+                    const careTypeId = parseInt(this.querySelector('input[name="careTypeId"]:checked').value);
+                    const notes = this.querySelector(`#notes-${plantId}`).value.trim();
+                    const image = this.querySelector(`#image-${plantId}`).value.trim();
+                    await submitCareHistory(plantId, careTypeId, notes, image);
+                    viewDetails(plantId); // Refresh details
+                });
+            } catch (error) {
+                console.error('Error loading details:', error.message);
+            }
         }
     };
 });

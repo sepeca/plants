@@ -69,7 +69,7 @@ $(document).ready(async function () {
                 order: [[1, 'asc']]
             });
 
-            $('#plant-ttasks tbody').on('click', '.details-btn', function () {
+            $('#plant-tasks tbody').on('click', '.details-btn', function () { // Fixed selector typo
                 const rowData = table.row($(this).parents('tr')).data();
                 showTaskDetails(rowData);
             });
@@ -84,6 +84,12 @@ $(document).ready(async function () {
     function showTaskDetails(data) {
         const detailContainer = $('.task-detail-container');
         const detailContent = $('#task-detail-content');
+
+        // Ensure the container exists and is properly initialized
+        if (detailContainer.length === 0 || detailContent.length === 0) {
+            console.error('Task detail container or content element is missing.');
+            return;
+        }
 
         // Check if the clicked task is already displayed
         if (detailContainer.is(':visible') && detailContent.data('taskId') === data.id) {
@@ -102,10 +108,6 @@ $(document).ready(async function () {
         `).data('taskId', data.id); // Store the task ID in the content for comparison
 
         detailContainer.show();
-
-        // Add event listener to close when clicking outside
-        $(document).off('click', closeOnOutsideClick); // Remove any existing event listener
-        $(document).on('click', closeOnOutsideClick);
 
         $('html, body').animate({ scrollTop: detailContainer.offset().top }, 'slow');
     }
