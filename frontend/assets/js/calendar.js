@@ -1,13 +1,9 @@
 import { SERVER_ADDRESS } from './config.js';
+import { checkAuthAndRedirect } from './auth.js';
 
 $(document).ready(async function () {
-    const token = localStorage.getItem('jwt');
-
-    if (!token) {
-        console.error('Authentication token is missing. Please log in again.');
-        window.location.href = './login.html';
-        return;
-    }
+    const token = checkAuthAndRedirect();
+    if (!token) return;
 
     try {
         const response = await fetch(`${SERVER_ADDRESS}/api/get_tasks`, {
@@ -73,7 +69,7 @@ $(document).ready(async function () {
                 order: [[1, 'asc']]
             });
 
-            $('#plant-tasks tbody').on('click', '.details-btn', function () {
+            $('#plant-ttasks tbody').on('click', '.details-btn', function () {
                 const rowData = table.row($(this).parents('tr')).data();
                 showTaskDetails(rowData);
             });

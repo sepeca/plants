@@ -1,19 +1,14 @@
-import { SERVER_ADDRESS } from './config.js'; // Import server address
+import { SERVER_ADDRESS } from './config.js';
+import { checkAuthAndRedirect } from './auth.js';
 
-const token = localStorage.getItem('jwt');
+const token = checkAuthAndRedirect();
+if (!token) return;
 
-if (!token) {
-    console.error('Authentication token is missing. Please log in again.');
-    window.location.href = './login.html';
-}
 
 
 
 
 // user should be shown error message that he doesnt have permission to access this page when get is called and he will get moved to calendar
-
-
-
 
 
 
