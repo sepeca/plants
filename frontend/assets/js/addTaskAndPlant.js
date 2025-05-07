@@ -24,10 +24,10 @@ async function fetchPlants() {
             const row = `
                 <tr>
                     <td>${plant.name}</td>
-                    <td>${plant.type}</td>
-                    <td>${plant.location}</td>
+                    <td>${plant.plantCategory.name}</td>
+                    <td>${plant.location.name}</td>
                     <td>
-                        <button onclick="viewDetails('${plant.name}')">Details</button>
+                        <button onclick="viewDetails('${plant.name}', ${JSON.stringify(plant).replace(/"/g, '&quot;')})">Details</button>
                         <button onclick="createTask('${plant.name}', this)">Create Task</button>
                     </td>
                 </tr>
@@ -150,7 +150,7 @@ window.handleTaskSubmit = async function(event, plantName) {
 // Fetch plants on page load
 fetchPlants();
 
-window.viewDetails = function(plantName) {
+window.viewDetails = function(plantName, plantData) {
     const parentRow = [...plantsTableBody.rows].find(row => row.cells[0].textContent === plantName);
     let detailsRow = parentRow.nextElementSibling;
 
@@ -163,8 +163,12 @@ window.viewDetails = function(plantName) {
         detailsRow.classList.add('details-row');
         detailsRow.innerHTML = `
             <td colspan="4" style="background-color: #f9f9f9; padding: 15px;">
-                <p><strong>Description:</strong> This is a placeholder description for ${plantName}.</p>
-                <p><strong>Assigned Users:</strong> user1@example.com, user2@example.com</p>
+                <p><strong>Description:</strong> ${plantData.description || 'No description available.'}</p>
+                <p><strong>Species:</strong> ${plantData.species}</p>
+                <p><strong>Humidity:</strong> ${plantData.plantInfo.humidity}</p>
+                <p><strong>Light Requirements:</strong> ${plantData.plantInfo.lightRequirements}</p>
+                <p><strong>Water:</strong> ${plantData.plantInfo.water}</p>
+                <p><strong>Temperature Range:</strong> ${plantData.plantInfo.temperatureRange}</p>
             </td>
         `;
         parentRow.insertAdjacentElement('afterend', detailsRow);
