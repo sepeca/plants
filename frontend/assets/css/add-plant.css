@@ -50,3 +50,131 @@ button[type="submit"] {
 button[type="submit"]:hover {
     background-color: #5c8a42;
 }
+
+.modal {
+    position: fixed;
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Adjust for the element's size */
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 90%; /* Set modal width to 90% */
+    max-height: 80%; /* Set maximum height */
+    overflow-y: auto; /* Add scrolling for content overflow */
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: row; /* Align left and right sections side by side */
+    gap: 20px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 90%; /* Set maximum width to 90% */
+    max-height: 80%; /* Set maximum height */
+    overflow-y: auto; /* Add scrolling for content overflow */
+    text-align: left; /* Ensure text is left-aligned */
+}
+
+.left-plane, .right-plane {
+    flex: 1; /* Equal width for both sections */
+    overflow-y: auto; /* Add scrolling if content overflows */
+}
+
+.left-plane {
+    border-right: 1px solid #ddd; /* Add a divider between sections */
+    padding-right: 20px;
+}
+
+.right-plane {
+    padding-left: 20px;
+}
+
+.modal-left, .modal-right {
+    flex: 1; /* Equal width for both sections */
+    overflow-y: auto; /* Add scrolling if content overflows */
+}
+
+.modal-left {
+    border-right: 1px solid #ddd; /* Add a divider between sections */
+    padding-right: 20px;
+}
+
+.modal-right {
+    padding-left: 20px;
+}
+
+#plant-details-content {
+    display: flex; /* Enable Flexbox for the parent container */
+    flex-direction: row; /* Align children side by side */
+    gap: 20px; /* Add spacing between left and right planes */
+    width: 100%;
+    max-height: 80%; /* Set maximum height */
+    overflow-y: auto; /* Add scrolling for content overflow */
+}
+
+.left-plane, .right-plane {
+    flex: 1; /* Equal width for both sections */
+    overflow-y: auto; /* Add scrolling if content overflows */
+}
+
+.left-plane {
+    border-right: 1px solid #ddd; /* Add a divider between sections */
+    padding-right: 20px;
+}
+
+.right-plane {
+    padding-left: 20px;
+}
+
+.plant-details-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.plant-details-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.plant-details-table .label {
+    background-color: #6a994e; /* Green background for labels */
+    color: white; /* White text for labels */
+    font-weight: bold;
+    text-align: left;
+    width: 40%; /* Adjust width as needed */
+}
+
+.plant-details-table .value {
+    background-color: white; /* White background for values */
+    color: #333; /* Dark text for values */
+    text-align: left;
+}
+
+.care-history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.care-history-table th, .care-history-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.care-history-table th {
+    background-color: #6a994e; /* Green background for headers */
+    color: white; /* White text for headers */
+    font-weight: bold;
+}
+
+.care-history-table td {
+    background-color: white; /* White background for cells */
+    color: #333; /* Dark text for cells */
+}
