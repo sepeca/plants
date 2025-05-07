@@ -178,3 +178,28 @@ button[type="submit"]:hover {
     background-color: white; /* White background for cells */
     color: #333; /* Dark text for cells */
 }
+
+#user-table-container {
+    width: 90%; /* Increase the width of the container */
+    margin: 0 auto; /* Center the container */
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+#user-table {
+    width: 100%; /* Ensure the table spans the full width of the container */
+    border-collapse: collapse;
+}
+
+#user-table th, #user-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+#user-table th {
+    background-color: #6a994e; /* Green background for headers */
+    color: white; /* White text for headers */
+}
