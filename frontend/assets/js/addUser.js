@@ -142,24 +142,27 @@ $(document).ready(async function () {
     // Handle form submission for adding a new user
     document.querySelector('#add-user-form').addEventListener('submit', async function (event) {
         event.preventDefault();
-        const username = document.querySelector('#username').value.trim();
+        const name = document.querySelector('#username').value.trim(); // Changed from username to name
         const email = document.querySelector('#email').value.trim();
         const password = document.querySelector('#password').value.trim();
         const isAdmin = document.querySelector('#is-admin').checked;
 
-        if (!username || !email || !password) {
+        if (!name || !email || !password) {
             alert('All fields are required.');
             return;
         }
 
+        // Log the form data being sent
+        console.log('Form data being sent:', { name, email, password, isAdmin });
+
         try {
-            const response = await fetch(`${SERVER_ADDRESS}/api/add_user`, {
+            const response = await fetch(`${SERVER_ADDRESS}/register_worker`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify({ username, email, password, isAdmin })
+                body: JSON.stringify({ name, email, password, isAdmin }) // Changed username to name
             });
 
             if (response.ok) {
