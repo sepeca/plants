@@ -88,26 +88,27 @@ $(document).ready(async function () {
         }
     }
 
-    async function deleteUser(userIds) {
+    async function deleteUser(userId) { // Changed parameter to accept a single userId
         try {
+            console.log('Data being sent for deletion:', { userId }); // Log the data being sent
             const response = await fetch(`${SERVER_ADDRESS}/api/delete_users`, {
-                method: 'POST',
+                method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify({ userIds })
+                body: JSON.stringify({ userId }) // Send userId as a string
             });
 
             if (response.ok) {
-                alert('User(s) deleted successfully!');
+                alert('User deleted successfully!');
                 location.reload(); // Reload the page to update the table
             } else {
                 const errorData = await response.json();
-                alert(`Failed to delete user(s): ${errorData.message || 'Unknown error'}`);
+                alert(`Failed to delete user: ${errorData.message || 'Unknown error'}`);
             }
         } catch (error) {
-            console.error('Error deleting user(s):', error.message);
+            console.error('Error deleting user:', error.message);
             alert('An error occurred. Please try again later.');
         }
     }
@@ -134,7 +135,7 @@ $(document).ready(async function () {
 
         if (confirm(`Do you want to proceed with action: Removing this user?`)) {
             if (confirm('Last chance. Are you sure?')) {
-                deleteUser([userId]);
+                deleteUser(userId); // Pass userId as a string
             }
         }
     });

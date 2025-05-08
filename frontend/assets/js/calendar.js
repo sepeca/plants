@@ -17,8 +17,11 @@ $(document).ready(async function () {
             let tasks = await response.json();
 
             tasks = tasks.map(task => {
+                console.log('Task before mapping:', task); // Debug log to inspect task data
                 task.plantSpecies = task.plantSpecies;
                 task.locationName = task.locationName;
+                task.id = task.id || task.taskId; // Map taskId to id if id is undefined
+                console.log('Task after mapping:', task); // Debug log to verify task.id is set
                 return task;
             });
 
@@ -28,7 +31,9 @@ $(document).ready(async function () {
                     {
                         data: null,
                         render: function (data, type, row) {
-                            return `<input type="checkbox" class="task-select" data-id="${row.id}">`;
+                            console.log('Row data:', row); // Debug log to inspect row data
+                            console.log('Row ID:', row.id); // Debug log to ensure row.id is correct
+                            return `<input type="checkbox" class="task-select" data-id="${row.id}">`; // Ensure data-id uses the correct id
                         },
                         orderable: false
                     },
@@ -55,7 +60,13 @@ $(document).ready(async function () {
                     const taskDate = new Date(data.taskDate);
                     const today = new Date();
                     const isPast = taskDate < today && taskDate.toDateString() !== today.toDateString();
-                    if (isPast) {
+
+                    if (data.completed) {
+                        $(row).css({
+                            'background-color': 'green',
+                            'color': 'white'
+                        });
+                    } else if (isPast) {
                         $(row).css({
                             'background-color': 'red',
                             'color': 'white'
@@ -112,29 +123,45 @@ $(document).ready(async function () {
         $('html, body').animate({ scrollTop: detailContainer.offset().top }, 'slow');
     }
 
-    $('#finish-tasks-btn').on('click', async function () {
+    $('#plant-tasks').on('change', '.task-select', function () {
         const selectedTasks = $('.task-select:checked').map(function () {
-            return $(this).data('id');
+            const taskId = $(this).data('id');
+            console.log('Checkbox data-id:', taskId); // Debug log for each checkbox
+            return taskId;
         }).get();
 
-        if (selectedTasks.length === 0) {
-            console.error('No tasks selected.');
+        console.log('Currently selected task IDs:', selectedTasks); // Log the selected task IDs
+    });
+
+    $('#finish-tasks-btn').on('click', async function () {
+        const selectedTasks = $('.task-select:checked').map(function () {
+            const taskId = $(this).data('id');
+            if (!taskId) {
+                console.error('Task ID is undefined for a selected task.');
+            }
+            return taskId;
+        }).get();
+
+        if (selectedTasks.length === 0 || selectedTasks.includes(undefined)) {
+            console.error('No valid tasks selected.');
             return;
         }
 
+        console.log('Selected task IDs to finish:', selectedTasks); // Log the task IDs
+
         try {
             const response = await fetch(`${SERVER_ADDRESS}/api/finish_tasks`, {
-                method: 'POST',
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + token
                 },
-                body: JSON.stringify({ taskIds: selectedTasks })
+                body: JSON.stringify({ task_ids: selectedTasks }) // Send task_ids as an array
             });
 
             if (response.ok) {
                 console.log('Tasks marked as finished.');
-                $('#plant-tasks').DataTable().clear().rows.add([]).draw(); // Optionally reload data
+                location.reload(); // Refresh the page after finishing tasks
             } else {
                 console.error('Failed to finish tasks. Please try again.');
             }
