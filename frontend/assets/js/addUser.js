@@ -32,10 +32,10 @@ $(document).ready(async function () {
                         <td>${user.email}</td>
                         <td>${user.admin ? 'Admin' : 'User'}</td>
                         <td>
-                            <button class="toggle-admin-btn" data-id="${user.userId}" data-is-admin="${user.admin}">
+                            <button class="action-btn toggle-admin-btn" data-id="${user.userId}" data-is-admin="${user.admin}">
                                 ${user.admin ? 'Revoke Admin' : 'Make Admin'}
                             </button>
-                            <button class="delete-btn" data-id="${user.userId}">Delete</button>
+                            <button class="action-btn delete-btn" data-id="${user.userId}">Delete</button>
                         </td>
                     </tr>
                 `;
