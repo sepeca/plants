@@ -24,5 +24,8 @@ export async function logout() {
     } catch (error) {
         console.error('Error during logout:', error);
         showNotification('An error occurred during logout.', false);
+    } finally {
+        localStorage.removeItem('jwt'); // Ensure token is removed even if logout fails
+        window.location.href = './login.html';
     }
 }

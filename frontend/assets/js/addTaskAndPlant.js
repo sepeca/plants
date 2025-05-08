@@ -25,6 +25,7 @@ $(document).ready(async function () {
                         <td>${plant.locationName}</td> <!-- Correctly mapped to location -->
                         <td>
                             <button onclick="viewDetails(${plant.plantId})">Details</button>
+                            <button onclick="deletePlant(${plant.plantId}, this)">Delete</button> <!-- New Delete button -->
                             <button onclick="createTask('${plant.platName}', this)">Create Task</button>
                         </td>
                     </tr>
@@ -64,23 +65,27 @@ $(document).ready(async function () {
 
     async function submitPlant(plantName, species, locationName, categoryName, humidity, lightRequirements, water, temperatureRange, imageUrls) {
         try {
-            const response = await fetch(`${SERVER_ADDRESS}/api/create_plant`, {
+            const body = {
+                plantName,
+                species,
+                locationName,
+                categoryName,
+                humidity,
+                lightRequirements,
+                water,
+                temperatureRange
+            };
+            if (imageUrls.length > 0) {
+                body.imageUrls = imageUrls; // Only include imageUrls if not empty
+            }
+
+            const response = await fetch(`${SERVER_ADDRESS}/api/add_plant`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    plantName,
-                    species,
-                    locationName,
-                    categoryName,
-                    humidity,
-                    lightRequirements,
-                    water,
-                    temperatureRange,
-                    imageUrls
-                })
+                body: JSON.stringify(body)
             });
             if (!response.ok) throw new Error('Failed to create plant');
             alert('Plant created successfully!');
@@ -147,13 +152,18 @@ $(document).ready(async function () {
 
     async function submitCareHistory(plantId, careTypeId, notes, image) {
         try {
-            const response = await fetch(`${SERVER_ADDRESS}/api/care_history`, {
+            const body = { plantId, careTypeId, notes };
+            if (image) {
+                body.image = image; // Only include image if it's not empty
+            }
+
+            const response = await fetch(`${SERVER_ADDRESS}/api/create_care_history`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify({ plantId, careTypeId, notes, image })
+                body: JSON.stringify(body)
             });
             if (!response.ok) throw new Error('Failed to create care history');
             alert('Care history entry created successfully!');
@@ -161,6 +171,34 @@ $(document).ready(async function () {
             console.error('Error creating care history:', error.message);
         }
     }
+
+    window.deletePlant = async function(plantId, button) {
+        if (!confirm('Do you want to proceed with action: Removing this plant?')) return;
+        if (!confirm('Last chance. Are you sure?')) return;
+
+        try {
+            console.log('Data being sent for deletion:', { plantId }); // Log the data being sent
+            const response = await fetch(`${SERVER_ADDRESS}/api/delete_plant`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ plantId: parseInt(plantId, 10) }) // Ensure plantId is sent as an integer
+            });
+
+            if (response.ok) {
+                alert('Plant deleted successfully!');
+                button.closest('tr').remove(); // Remove the plant row from the table
+            } else {
+                const errorData = await response.json();
+                alert(`Failed to delete plant: ${errorData.message || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error('Error deleting plant:', error.message);
+            alert('An error occurred. Please try again later.');
+        }
+    };
 
     document.querySelector('#plant-add-form').addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -177,8 +215,8 @@ $(document).ready(async function () {
             .map(url => url.trim())
             .filter(url => url);
 
-        if (!plantName || !species || !locationName || !categoryName || !humidity || !lightRequirements || !water || !temperatureRange || imageUrls.length === 0) {
-            alert('All fields are required, and at least one image URL must be provided.');
+        if (!plantName || !species || !locationName || !categoryName || !humidity || !lightRequirements || !water || !temperatureRange) {
+            alert('All fields except Image URLs are required.');
             return;
         }
 
@@ -212,10 +250,14 @@ $(document).ready(async function () {
         <input type="text" id="temperature-range" name="temperature-range" required>
 
         <label for="image-urls">Image URLs (comma-separated):</label>
-        <textarea id="image-urls" name="image-urls" rows="3" required></textarea>
+        <textarea id="image-urls" name="image-urls" rows="3"></textarea>
 
         <button type="submit" style="background-color: #6a994e; color: white; border: none; padding: 10px 20px; font-size: 1em; border-radius: 5px; cursor: pointer;">Add Plant</button>
     `;
+
+    document.querySelector('#plant-add-form').style.gap = '5px'; // Set form gap to 5px
+    document.querySelector('.main-container').style.marginTop = '100px'; // Set main-container margin-top to 100px
+    document.querySelector('.modal-content').style.marginTop = '200px'; // Set modal-content margin-top to 200px
 
     window.createTask = function(plantName, button) {
         const parentRow = button.closest('tr');
@@ -296,6 +338,7 @@ $(document).ready(async function () {
                                 <th>Notes</th>
                                 <th>User</th>
                                 <th>Image</th>
+                                <th>Action</th> <!-- New column for actions -->
                             </tr>
                         </thead>
                         <tbody>
@@ -308,6 +351,9 @@ $(document).ready(async function () {
                                         <td>${history.notes || 'No notes provided'}</td>
                                         <td>${history.userName} (${history.userEmail})</td>
                                         <td>${history.imageUrl ? `<a href="${history.imageUrl}" target="_blank">View</a>` : 'No image'}</td>
+                                        <td>
+                                            <button onclick="deleteCareHistory(${history.careHistoryId}, this)">DEL</button> <!-- DEL button -->
+                                        </td>
                                     </tr>
                                 `).join('')}
                         </tbody>
@@ -386,6 +432,32 @@ $(document).ready(async function () {
             };
         } catch (error) {
             console.error('Error loading details:', error.message);
+        }
+    };
+
+    window.deleteCareHistory = async function(careHistoryId, button) {
+        if (!confirm('Are you sure you want to delete this care history entry?')) return;
+
+        try {
+            const response = await fetch(`${SERVER_ADDRESS}/api/care_history_delete`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ careHistoryId })
+            });
+
+            if (response.ok) {
+                alert('Care history entry deleted successfully!');
+                button.closest('tr').remove(); // Remove the care history row from the table
+            } else {
+                const errorData = await response.json();
+                alert(`Failed to delete care history: ${errorData.message || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error('Error deleting care history:', error.message);
+            alert('An error occurred. Please try again later.');
         }
     };
 });

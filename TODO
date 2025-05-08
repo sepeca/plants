@@ -1,5 +1,6 @@
-calendar (finish task)
-addPlant (create task; create plant; create care history;delete plant;delete care history)
+addPlant (
+    create task
+    )
 
 
 - dokumentacia
