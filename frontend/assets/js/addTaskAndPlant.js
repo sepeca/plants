@@ -40,21 +40,25 @@ $(document).ready(async function () {
         }
     }
 
-    async function submitTask(plantName, taskDetails, taskTime, taskEmails, includeMe) {
+    async function submitTask(plantId, taskDetails, taskTime, taskEmails, includeMe) {
         try {
+            const body = {
+                plantId, // Include plantId in the request body
+                description: taskDetails,
+                time: taskTime,
+                me: includeMe,
+            };
+            if (taskEmails.length > 0) {
+                body.emails = taskEmails; // Only include emails if not empty
+            }
+
             const response = await fetch(`${SERVER_ADDRESS}/api/create_task`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    plantName,
-                    details: taskDetails,
-                    time: taskTime,
-                    emails: taskEmails,
-                    includeMe
-                })
+                body: JSON.stringify(body)
             });
             if (!response.ok) throw new Error('Failed to create task');
             alert('Task created successfully!');
@@ -258,6 +262,12 @@ $(document).ready(async function () {
     document.querySelector('#plant-add-form').style.gap = '5px'; // Set form gap to 5px
     document.querySelector('.main-container').style.marginTop = '100px'; // Set main-container margin-top to 100px
     document.querySelector('.modal-content').style.marginTop = '200px'; // Set modal-content margin-top to 200px
+    document.querySelector('.table-container').style.width = '650px'; // Set table-container width to 1000px
+
+    document.querySelectorAll('#plants-table button').forEach(button => {
+        button.style.padding = '5px 10px'; // Make action buttons smaller
+        button.style.fontSize = '0.9em'; // Reduce font size for buttons
+    });
 
     window.createTask = function(plantName, button) {
         const parentRow = button.closest('tr');
@@ -270,18 +280,18 @@ $(document).ready(async function () {
             taskRow.classList.add('task-row');
             taskRow.innerHTML = `
                 <td colspan="4">
-                    <form style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;" onsubmit="handleTaskSubmit(event, '${plantName}')">
-                        <label for="task-details-${plantName}">Details:</label>
-                        <textarea id="task-details-${plantName}" name="task-details" rows="3" required></textarea>
+                    <form style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;" onsubmit="handleTaskSubmit(event, '${parentRow.dataset.plantId}')">
+                        <label for="task-details-${parentRow.dataset.plantId}">Description:</label>
+                        <textarea id="task-details-${parentRow.dataset.plantId}" name="task-details" rows="3" required></textarea>
                         
-                        <label for="task-time-${plantName}">Time (in days):</label>
-                        <input type="number" id="task-time-${plantName}" name="task-time" min="1" required>
+                        <label for="task-time-${parentRow.dataset.plantId}">Time (in days):</label>
+                        <input type="number" id="task-time-${parentRow.dataset.plantId}" name="task-time" min="1" required>
                         
-                        <label for="task-emails-${plantName}">Emails (comma separated):</label>
-                        <input type="text" id="task-emails-${plantName}" name="task-emails" required>
+                        <label for="task-emails-${parentRow.dataset.plantId}">Emails (comma separated):</label>
+                        <input type="text" id="task-emails-${parentRow.dataset.plantId}" name="task-emails">
                         
                         <label>
-                            <input type="checkbox" id="task-include-me-${plantName}" name="task-include-me">
+                            <input type="checkbox" id="task-include-me-${parentRow.dataset.plantId}" name="task-include-me">
                             Include Me
                         </label>
                         
@@ -293,19 +303,22 @@ $(document).ready(async function () {
         }
     };
 
-    window.handleTaskSubmit = async function(event, plantName) {
+    window.handleTaskSubmit = async function(event, plantId) {
         event.preventDefault();
         const taskDetails = event.target.querySelector(`[name="task-details"]`).value.trim();
         const taskTime = event.target.querySelector(`[name="task-time"]`).value.trim();
-        const taskEmails = event.target.querySelector(`[name="task-emails"]`).value.trim();
+        const taskEmails = event.target.querySelector(`[name="task-emails"]`).value
+            .split(',')
+            .map(email => email.trim())
+            .filter(email => email); // Filter out empty emails
         const includeMe = event.target.querySelector(`[name="task-include-me"]`).checked;
 
-        if (!taskDetails || !taskTime || !taskEmails) {
-            alert('All fields must be filled in to create a new task.');
+        if (!taskDetails || !taskTime) {
+            alert('Task details and time are required.');
             return;
         }
 
-        await submitTask(plantName, taskDetails, taskTime, taskEmails, includeMe);
+        await submitTask(plantId, taskDetails, taskTime, taskEmails, includeMe);
         event.target.closest('tr').remove(); // Remove the task row after submission
     };
 
