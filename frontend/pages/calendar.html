@@ -34,6 +34,9 @@
 
     <div class="calendar-container">
         <div class="table-container">
+            <div id="plant-tasks_filter" class="dataTables_filter">
+                <!-- Dropdown filters for Task Date and Status will be dynamically added here -->
+            </div>
             <table id="plant-tasks" class="display">
                 <thead>
                     <tr>
@@ -42,7 +45,8 @@
                         <th>Plant Name</th>
                         <th>Plant Species</th> <!-- Updated header -->
                         <th>Location</th>
-                        <th>Actions</th>
+                        <th>Status</th> <!-- Moved Status column -->
+                        <th>Actions</th> <!-- Moved Actions column -->
                     </tr>
                 </thead>
                 <tbody>

@@ -25,6 +25,11 @@ $(document).ready(async function () {
                 return task;
             });
 
+            tasks = tasks
+                .filter(task => !task.completed) // Filter uncompleted tasks first
+                .concat(tasks.filter(task => task.completed)) // Append completed tasks
+                .sort((a, b) => new Date(a.taskDate) - new Date(b.taskDate)); // Sort by date
+
             const table = $('#plant-tasks').DataTable({
                 data: tasks,
                 columns: [
@@ -50,6 +55,12 @@ $(document).ready(async function () {
                     { data: 'plantSpecies' },
                     { data: 'locationName' },
                     {
+                        data: 'completed',
+                        render: function (data, type, row) {
+                            return data ? 'Completed' : 'Pending'; // Display "Completed" or "Pending"
+                        }
+                    },
+                    {
                         data: null,
                         render: function (data, type, row) {
                             return `<button class="details-btn" data-id="${row.id}">Details</button>`;
@@ -59,14 +70,24 @@ $(document).ready(async function () {
                 createdRow: function (row, data) {
                     const taskDate = new Date(data.taskDate);
                     const today = new Date();
-                    const isPast = taskDate < today && taskDate.toDateString() !== today.toDateString();
+                    const yesterday = new Date();
+                    yesterday.setDate(today.getDate() - 1);
+
+                    const isTodayOrYesterday =
+                        taskDate.toDateString() === today.toDateString() ||
+                        taskDate.toDateString() === yesterday.toDateString();
 
                     if (data.completed) {
                         $(row).css({
                             'background-color': 'green',
                             'color': 'white'
                         });
-                    } else if (isPast) {
+                    } else if (isTodayOrYesterday) {
+                        $(row).css({
+                            'background-color': 'yellow',
+                            'color': 'black'
+                        });
+                    } else if (taskDate < today && taskDate.toDateString() !== today.toDateString()) {
                         $(row).css({
                             'background-color': 'red',
                             'color': 'white'
@@ -77,7 +98,48 @@ $(document).ready(async function () {
                 scrollY: '400px',
                 scrollCollapse: true,
                 scroller: true,
-                order: [[1, 'asc']]
+                order: [[1, 'asc']],
+                initComplete: function () {
+                    const table = this.api();
+
+                    // Add a dropdown filter for the "Task Date" column
+                    const dateFilter = $('<select><option value="">All Dates</option><option value="Today">Today</option><option value="Yesterday">Yesterday</option><option value="Past">Past</option></select>')
+                        .appendTo($('#plant-tasks_filter'))
+                        .on('change', function () {
+                            const val = $(this).val();
+                            const today = new Date();
+                            const yesterday = new Date();
+                            yesterday.setDate(today.getDate() - 1);
+
+                            table.column(1).search('', false, false).draw(); // Clear previous search
+                            if (val === 'Today') {
+                                table.column(1).search(today.toISOString().split('T')[0], true, false).draw();
+                            } else if (val === 'Yesterday') {
+                                table.column(1).search(yesterday.toISOString().split('T')[0], true, false).draw();
+                            } else if (val === 'Past') {
+                                table.rows().every(function () {
+                                    const data = this.data();
+                                    const taskDate = new Date(data.taskDate);
+                                    if (taskDate < today && taskDate.toDateString() !== today.toDateString()) {
+                                        $(this.node()).show();
+                                    } else {
+                                        $(this.node()).hide();
+                                    }
+                                });
+                            }
+                        });
+
+                    // Add a dropdown filter for the "Status" column
+                    const statusFilter = $('<select><option value="">All Statuses</option><option value="Completed">Completed</option><option value="Pending" selected>Pending</option></select>')
+                        .appendTo($('#plant-tasks_filter'))
+                        .on('change', function () {
+                            const val = $(this).val();
+                            table.column(5).search(val).draw(); // Filter the "Status" column (index 5)
+                        });
+
+                    // Trigger the default filter for "Pending"
+                    table.column(5).search('Pending').draw();
+                }
             });
 
             $('#plant-tasks tbody').on('click', '.details-btn', function () { // Fixed selector typo

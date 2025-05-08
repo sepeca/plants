@@ -2,8 +2,8 @@ import { SERVER_ADDRESS } from './config.js';
 
 document.getElementById('register-form').addEventListener('submit', async function(event) {
     event.preventDefault();
-    const organization = document.getElementById('organization').value;
-    const username = document.getElementById('username').value;
+    const organizationName = document.getElementById('organization').value;
+    const name = document.getElementById('username').value;
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm-password').value;
@@ -14,17 +14,16 @@ document.getElementById('register-form').addEventListener('submit', async functi
     }
 
     try {
-        const response = await fetch(`${SERVER_ADDRESS}/api/register_self`, {
+        const response = await fetch(`${SERVER_ADDRESS}/register_self`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ organization, username, email, password })
+            body: JSON.stringify({ organizationName, name, email, password })
         });
 
         const data = await response.json();
 
         if (data.status === "success") {
-            document.cookie = `authToken=${data.token}; max-age=7200; path=/`; // Store token as a cookie
-            window.location.href = './calendar.html'; // Redirect to calendar
+            window.location.href = './login.html'; // Redirect to login
         } else {
             alert(`Registration failed: ${data.message || 'Unknown error'}`);
         }
