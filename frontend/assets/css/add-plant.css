@@ -7,7 +7,7 @@
 
 .table-container {
     width: 1200px;
-    flex: 4; /* 80% of the space */
+    flex: 5.5; /* 80% of the space */
     border: 1px solid #ccc;
     border-radius: 8px;
     padding: 20px;
@@ -15,7 +15,7 @@
 }
 
 .form-container {
-    flex: 1; /* 20% of the space */
+    flex: 2; /* 20% of the space */
     border: 1px solid #ccc;
     border-radius: 8px;
     padding: 20px;
@@ -61,8 +61,8 @@ button[type="submit"]:hover {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 90%; /* Set modal width to 90% */
-    max-height: 80%; /* Set maximum height */
+    width: 100%; /* Set modal width to 90% */
+    height: 100%; /* Set maximum height */
     overflow-y: auto; /* Add scrolling for content overflow */
 }
 
