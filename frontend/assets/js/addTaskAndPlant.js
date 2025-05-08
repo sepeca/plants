@@ -261,7 +261,6 @@ $(document).ready(async function () {
 
     document.querySelector('#plant-add-form').style.gap = '5px'; // Set form gap to 5px
     document.querySelector('.main-container').style.marginTop = '100px'; // Set main-container margin-top to 100px
-    document.querySelector('.modal-content').style.marginTop = '200px'; // Set modal-content margin-top to 200px
     document.querySelector('.table-container').style.width = '650px'; // Set table-container width to 1000px
 
     document.querySelectorAll('#plants-table button').forEach(button => {
