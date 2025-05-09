@@ -2,10 +2,7 @@ package sia.plants.service.user;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import sia.plants.DTO.user.CreateUserRequest;
-import sia.plants.DTO.user.CreateUserWithOrganizationRequest;
-import sia.plants.DTO.user.OrgMemberResponse;
-import sia.plants.DTO.user.UpdateUserRequest;
+import sia.plants.DTO.user.*;
 import sia.plants.entities.UserOrgView;
 import sia.plants.exception.NotFoundException;
 import sia.plants.model.user.User;
@@ -13,6 +10,7 @@ import sia.plants.repository.entities.UserOrgViewRepository;
 import sia.plants.repository.user.UserRepository;
 import sia.plants.model.Organization;
 import sia.plants.repository.OrganizationRepository;
+import sia.plants.repository.user.UserRepositoryCustom;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,12 +22,14 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final OrganizationRepository organizationRepository;
     private final UserOrgViewRepository userOrgViewRepository;
-
+    private final UserRepositoryCustom userRepositoryCustom;
     public UserServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
                            OrganizationRepository organizationRepository,
-                           UserOrgViewRepository userOrgViewRepository) {
+                           UserOrgViewRepository userOrgViewRepository,
+                           UserRepositoryCustom userRepositoryCustom) {
         this.userRepository = userRepository;
+        this.userRepositoryCustom = userRepositoryCustom;
         this.passwordEncoder = passwordEncoder;
         this.organizationRepository = organizationRepository;
         this.userOrgViewRepository = userOrgViewRepository;
@@ -56,6 +56,12 @@ public class UserServiceImpl implements UserService {
         UUID uuid = UUID.fromString(userId);
         return userRepository.findById(uuid)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+    }
+    @Override
+    public String getEmailByUserId(UUID userId) {
+        return userRepository.findById(userId)
+                .map(User::getEmail)
+                .orElse("unknown");
     }
     @Override
     public User createUser(CreateUserRequest request) {
@@ -97,8 +103,8 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (request.getName() != null) {
-            user.setName(request.getName());
+        if (request.getUsername() != null) {
+            user.setName(request.getUsername());
         }
 
         if (request.getNewPassword() != null && !request.getNewPassword().isBlank()) {
@@ -108,6 +114,18 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
     @Override
+    public void toggleAdmin(UUID orgId, ToggleAdminRequest request){
+        boolean isMember = getOrgMembersIds(orgId).contains(request.getUserId());
+        if(!isMember){
+            throw new NotFoundException("User was not found in your organization");
+        }
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        user.setAdmin(request.getIsAdmin());
+
+        userRepository.save(user);
+    }
+    @Override
     public List<OrgMemberResponse> getOrgMembers(UUID orgId) {
         return userRepository.findAllByOrganization_OrganizationId(orgId).stream()
                 .map(user -> {
@@ -115,6 +133,7 @@ public class UserServiceImpl implements UserService {
                     dto.setUserId(user.getUserId());
                     dto.setName(user.getName()); // может быть null
                     dto.setEmail(user.getEmail());
+                    dto.setAdmin(user.isAdmin());
                     return dto;
                 })
                 .toList();
@@ -122,7 +141,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UUID> getOrgMembersIds(UUID orgId){
         return userRepository.findAllByOrganization_OrganizationId(orgId).stream()
-                .map(user -> user.getUserId())
+                .map(User::getUserId)
                 .toList();
+    }
+    @Override
+    public void deleteUser(UUID userId){
+        userRepositoryCustom.deleteUserWithCheck(userId);
     }
 }

@@ -2,9 +2,8 @@ package sia.plants.service.task;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sia.plants.DTO.task.CreateTaskRequest;
-import sia.plants.DTO.task.TaskPlantDTO;
-import sia.plants.DTO.task.TaskResponse;
+import org.springframework.web.bind.annotation.RequestHeader;
+import sia.plants.DTO.task.*;
 import sia.plants.entities.UserTaskView;
 import sia.plants.model.Task;
 import sia.plants.model.plant.Plant;
@@ -18,7 +17,9 @@ import sia.plants.repository.user.UserTaskRepository;
 import sia.plants.security.JwtService;
 import sia.plants.service.user.UserService;
 
+import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class TaskServiceImpl implements TaskService {
@@ -49,7 +50,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Transactional
     @Override
-    public void createTask(CreateTaskRequest request, String token) {
+    public void createTask(CreateTaskRequest request,String token) {
 
 
         UUID orgId = UUID.fromString(jwtService.extractOrganizationId(token));
@@ -63,16 +64,25 @@ public class TaskServiceImpl implements TaskService {
         }
 
         Task task = new Task();
-        task.setText(request.getText());
-        task.setDueDate(request.getDueDate());
+        task.setText(request.getDescription());
+        int days = request.getFinishDate();
+        task.setDueDate(
+                new Timestamp(System.currentTimeMillis() + 86400000L * days)
+        );
         task.setCompleted(false);
         task.setPlant(plant);
 
         taskRepository.save(task);
 
-        Set<UUID> allUserIds = new HashSet<>(request.getUserIds());
+        Set<UUID> allUserIds = new HashSet<>();
+        if(request.getEmails() != null){
+        for(String email : request.getEmails()){
+            allUserIds.add(userRepository.findByEmail(email).get().getUserId());
+        }}
 
-        // если me=true, добавляем текущего пользователя
+
+
+
         if (Boolean.TRUE.equals(request.getMe())) {
             allUserIds.add(currentUserId);
         }
@@ -83,23 +93,141 @@ public class TaskServiceImpl implements TaskService {
             UserTask userTask = new UserTask();
             userTask.setTask(task);
             userTask.setUser(user);
-            userTask.setNotified(false); // если поле есть
+            userTask.setNotified(false);
             userTaskRepository.save(userTask);
         }
     }
-    //TODO: повторное отсылание заданий которые привязаны к пользователю
+
+    private TaskWithUsersDTO mapUserTaskViewToDto(UserTaskView task, String username) {
+        TaskWithUsersDTO dto = new TaskWithUsersDTO();
+        dto.setTaskId(task.getTaskId());
+        dto.setTaskDescription(task.getTaskDescription());
+        dto.setCompleted(task.getCompleted());
+        dto.setDueDate(task.getDueDate());
+        dto.setCareTaker(task.getCareTaker());
+        dto.setPlantId(task.getPlantId());
+        dto.setPlantName(task.getPlantName());
+        dto.setPlantSpecies(task.getPlantSpecies());
+        dto.setAssignedUsers(new ArrayList<>());
+        dto.setLocationName(task.getLocationName());
+        return dto;
+    }
+    private TaskWithUsersDTO createTaskWithUsersDTO(Task task){
+        TaskWithUsersDTO dto = new TaskWithUsersDTO();
+        dto.setTaskId(task.getTaskId());
+        dto.setTaskDescription(task.getText());
+        dto.setCompleted(task.getCompleted());
+        dto.setDueDate(task.getDueDate());
+        dto.setCareTaker(task.getCareTaker());
+        Plant plant = task.getPlant();
+        dto.setPlantId(plant.getPlantId());
+        dto.setPlantName(plant.getName());
+        dto.setPlantSpecies(plant.getSpecies());
+
+        dto.setLocationName(plant.getLocation().getName());
+        return dto;
+    }
+
     @Override
-    public List<UserTaskView> getAllTasks(UUID orgId) {
-        List<UUID> userIds = userService.getOrgMembersIds(orgId);
-        List<UserTaskView> allTasks = new ArrayList<>();
+    public List<TaskWithUsersDTO> getAllTasks(UUID orgId) {
+        Set<UUID> userIds = new HashSet<>(userService.getOrgMembersIds(orgId));
+        Map<Integer, TaskWithUsersDTO> taskMap = new LinkedHashMap<>();
+
+
         for (UUID userId : userIds) {
-            allTasks.addAll(getMyTasks(userId));
+            for (UserTaskView task : userTaskViewRepository.findAllByUserId(userId)) {
+                String username = (task.getUsername() != null && !task.getUsername().isBlank())
+                        ? task.getUsername()
+                        : userService.getEmailByUserId(task.getUserId());
+
+                taskMap.computeIfAbsent(task.getTaskId(), id -> mapUserTaskViewToDto(task, username))
+                        .getAssignedUsers().add(username);
+            }
         }
-        return allTasks;
+
+
+        List<Task> finishedTasks = new ArrayList<>();
+        for (UUID userId : userIds) {
+            String name = userService.getUserById(userId.toString()).getName();
+            String email = userService.getEmailByUserId(userId);
+            if (name != null && !name.isBlank()) {
+                finishedTasks.addAll(taskRepository.findTasksByCareTakerAndOrganizationId(name, orgId));
+            }
+            finishedTasks.addAll(taskRepository.findTasksByCareTakerAndOrganizationId(email, orgId));
+        }
+        for (Task task : finishedTasks) {
+            TaskWithUsersDTO dto = createTaskWithUsersDTO(task);
+            dto.setAssignedUsers(Collections.singletonList(task.getCareTaker()));
+            taskMap.putIfAbsent(task.getTaskId(), dto);
+        }
+
+        return new ArrayList<>(taskMap.values());
+    }
+
+    @Override
+    public List<TaskWithUsersDTO> getMyTasks(UUID userId, UUID orgId) {
+        Map<Integer, TaskWithUsersDTO> taskMap = new LinkedHashMap<>();
+
+
+        for (UserTaskView task : userTaskViewRepository.findAllByUserId(userId)) {
+            String username = (task.getUsername() != null && !task.getUsername().isBlank())
+                    ? task.getUsername()
+                    : userService.getEmailByUserId(task.getUserId());
+
+            taskMap.computeIfAbsent(task.getTaskId(), id -> mapUserTaskViewToDto(task, username));
+        }
+
+
+        String name = userService.getUserById(userId.toString()).getName();
+        String email = userService.getEmailByUserId(userId);
+        List<Task> finishedTasks = new ArrayList<>();
+        if (name != null && !name.isBlank()) {
+            finishedTasks.addAll(taskRepository.findTasksByCareTakerAndOrganizationId(name, orgId));
+        }
+        finishedTasks.addAll(taskRepository.findTasksByCareTakerAndOrganizationId(email, orgId));
+
+        for (Task task : finishedTasks) {
+            TaskWithUsersDTO dto = createTaskWithUsersDTO(task);
+            dto.setAssignedUsers(Collections.singletonList(task.getCareTaker()));
+            taskMap.putIfAbsent(task.getTaskId(), dto);
+        }
+
+        return new ArrayList<>(taskMap.values());
+    }
+
+
+
+
+    @Override
+    public void finishTasksNotAdmin(UUID userId, UUID orgId, FinishTasksRequest request){
+        List<Integer> taskIds = request.getTaskIds();
+
+        List<UserTaskView> userTasksCheck = userTaskViewRepository.findAllByUserIdAndTaskIdIn(userId, taskIds);
+        if (userTasksCheck.size() != taskIds.size()) {
+            throw new IllegalArgumentException("Some tasks do not belong to the user");
+        }
+        List<Task> tasks = taskRepository.findTasksByUserId(userId);
+
+
+        tasks.forEach(task -> task.setCompleted(true));
+        taskRepository.saveAll(tasks);
+
     }
     @Override
-    public List<UserTaskView> getMyTasks(UUID userId) {
-        return userTaskViewRepository.findAllByUserId(userId);
+    public void finishTasksAdmin(UUID userId, UUID orgId, FinishTasksRequest request){
+        List<Integer> taskIds = request.getTaskIds();
+
+        List<Task> tasks = taskRepository.findAllById(taskIds);
+
+        boolean allInOrg = tasks.stream()
+                .allMatch(task -> task.getPlant().getOrganization().getOrganizationId().equals(orgId));
+
+        if (!allInOrg) {
+            throw new IllegalArgumentException("Some tasks do not belong to your organization");
+        }
+
+        tasks.forEach(task -> task.setCompleted(true));
+        taskRepository.saveAll(tasks);
     }
 }
 

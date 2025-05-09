@@ -2,10 +2,7 @@ package sia.plants.service.user;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import sia.plants.DTO.user.CreateUserRequest;
-import sia.plants.DTO.user.CreateUserWithOrganizationRequest;
-import sia.plants.DTO.user.OrgMemberResponse;
-import sia.plants.DTO.user.UpdateUserRequest;
+import sia.plants.DTO.user.*;
 import sia.plants.entities.UserOrgView;
 import sia.plants.model.user.User;
 import sia.plants.repository.user.UserRepository;
@@ -22,8 +19,10 @@ public interface UserService {
     User getUserById(String userId);
     User registerUserWithOrganization(CreateUserWithOrganizationRequest request);
     User updateCurrentUser(String userId, UpdateUserRequest request);
-
+    String getEmailByUserId(UUID userId);
     List<OrgMemberResponse> getOrgMembers(UUID orgId);
     List<UUID> getOrgMembersIds(UUID orgId);
+    void toggleAdmin(UUID orgId, ToggleAdminRequest request);
+    void deleteUser(UUID userId);
 }
 

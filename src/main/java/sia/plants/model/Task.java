@@ -22,6 +22,9 @@ public class Task {
     @Column(name = "text")
     private String text;
 
+
+    @Column(name = "care_taker")
+    private String careTaker;
     @ManyToOne
     @JoinColumn(name = "plantid", nullable = false)
     private Plant plant;
@@ -65,4 +68,12 @@ public class Task {
     public void setPlant(Plant plant) {
         this.plant = plant;
     }
+    public String getCareTaker() {
+        return careTaker;
+    }
+
+    public void setCareTaker(String careTaker) {
+        this.careTaker = careTaker;
+    }
+
 }

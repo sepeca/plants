@@ -50,15 +50,32 @@ public class CustomPlantRepositoryImpl implements CustomPlantRepository {
             stmt.setString(8, water);
             stmt.setString(9, temperatureRange);
 
-            // Преобразуем List<String> в PostgreSQL TEXT[]
-            Array urlArray = connection.createArrayOf("text", imageUrls.toArray());
-            stmt.setArray(10, urlArray);
-
+            if(imageUrls != null) {
+                Array urlArray = connection.createArrayOf("text", imageUrls.toArray());
+                stmt.setArray(10, urlArray);
+            }else{
+                stmt.setNull(10, java.sql.Types.ARRAY);
+            }
             stmt.execute();
 
         } catch (SQLException e) {
             throw new RuntimeException("Failed to execute stored procedure: " + e.getMessage(), e);
         }
         });
+    }
+    @Override
+    @Transactional
+    public void deletePlantCascade(Integer plantId) {
+        Session session = entityManager.unwrap(Session.class);
+        session.doWork(connection -> {
+            try (CallableStatement stmt = connection.prepareCall("CALL delete_plant_cascade(?)")) {
+                stmt.setInt(1, plantId);
+                stmt.execute();
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to delete plant: " + e.getMessage(), e);
+            }
+        });
+    }
 
-}}
+
+}

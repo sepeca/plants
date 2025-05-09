@@ -8,4 +8,5 @@ public class OrgMemberResponse {
     private UUID userId;
     private String name;
     private String email;
+    private Boolean admin;
 }

@@ -19,4 +19,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer>{
 
     @Query("SELECT DISTINCT ut.task FROM UserTask ut WHERE ut.user.organization.organizationId = :orgId")
     List<Task> findTasksByOrganizationId(@Param("orgId") UUID orgId);
+    @Query(" SELECT t FROM Task t WHERE t.careTaker = :careTaker AND t.plant.organization.organizationId = :orgId")
+    List<Task> findTasksByCareTakerAndOrganizationId(@Param("careTaker") String careTaker,
+                                                     @Param("orgId") UUID orgId);
 }

@@ -1,58 +1,64 @@
 package sia.plants.exception;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sia.plants.DTO.ApiResponse;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<?> handleIllegalArg(IllegalArgumentException ex) {
-        Map<String, String> errorBody = new HashMap<>();
-        errorBody.put("error", ex.getMessage());
-        return ResponseEntity.status(400).body(errorBody);
-    }
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<?> handleNotFound(NotFoundException ex) {
-        Map<String, String> errorBody = new HashMap<>();
-        errorBody.put("error", ex.getMessage());
-        return ResponseEntity.status(404).body(errorBody);
-    }
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<?> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-        ex.getRootCause();
-        String message = ex.getRootCause().getMessage();
 
-        Map<String, String> errorBody = new HashMap<>();
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse> handleIllegalArg(IllegalArgumentException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.failure(ex.getMessage()));
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ApiResponse> handleNotFound(NotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.failure(ex.getMessage()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        String message = ex.getRootCause() != null ? ex.getRootCause().getMessage() : ex.getMessage();
 
         if (message != null && message.contains("User and plant must belong to the same organization")) {
-            errorBody.put("error", "User and plant must belong to the same organization");
-            return ResponseEntity.status(403).body(errorBody);
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.failure("User and plant must belong to the same organization"));
         }
 
-        // Обработка других возможных нарушений целостности, например email
         if (message != null && message.contains("users_email_key")) {
-            errorBody.put("error", "User with this email already exists");
-            return ResponseEntity.status(409).body(errorBody);
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(ApiResponse.failure("User with this email already exists"));
         }
 
-        errorBody.put("error", "Data integrity violation: " + message);
-        return ResponseEntity.status(400).body(errorBody);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.failure("Data integrity violation: " + message));
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<?> handleRuntime(RuntimeException ex) {
-        Map<String, String> errorBody = new HashMap<>();
-        errorBody.put("error", ex.getMessage());
-        return ResponseEntity.status(500).body(errorBody);
+    public ResponseEntity<ApiResponse> handleRuntime(RuntimeException ex) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.failure(ex.getMessage()));
     }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleGeneric(Exception ex) {
-        Map<String, String> errorBody = new HashMap<>();
-        errorBody.put("error", ex.getMessage());
-        return ResponseEntity.status(500).body(errorBody);
+    public ResponseEntity<ApiResponse> handleGeneric(Exception ex) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.failure("Unexpected error: " + ex.getMessage()));
     }
 }
+

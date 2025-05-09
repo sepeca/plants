@@ -14,6 +14,7 @@ import sia.plants.repository.CareHistoryRepository;
 import sia.plants.repository.plant.PlantRepository;
 import sia.plants.security.JwtService;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +38,7 @@ public class CareServiceImpl implements CareService{
                                   CareType careType) {
 
         CareHistory careHistory = new CareHistory();
-        careHistory.setCareDate(request.getCareDate());
+        careHistory.setCareDate(new Timestamp(System.currentTimeMillis()));
         careHistory.setImageUrl(request.getImageUrl());
         careHistory.setNotes(request.getNotes());
         careHistory.setPlant(plant);

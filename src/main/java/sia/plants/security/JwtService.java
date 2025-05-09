@@ -6,15 +6,12 @@ import org.springframework.stereotype.Service;
 import sia.plants.model.user.User;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class JwtService {
     private final Key keyToken = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-
+    private final Set<String> blacklistedTokens = new HashSet<>();
 
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
@@ -33,6 +30,13 @@ public class JwtService {
                 .signWith(keyToken)
                 .compact();
     }
+    public void blacklistToken(String token) {
+        blacklistedTokens.add(token);
+    }
+
+    public boolean isBlacklisted(String token) {
+        return blacklistedTokens.contains(token);
+    }
 
     public boolean validateToken(String token) {
         try {
@@ -42,10 +46,17 @@ public class JwtService {
             return false;
         }
     }
+
     public void validate(String token){
-        if (!validateToken(token)) {
+        if (!validateToken(token) || isBlacklisted(token)) {
             throw new IllegalArgumentException("Invalid token");
         }
+    }
+    public String extractToken(String authHeader){
+       String token =  authHeader.substring(7);
+        System.out.println("EXTRACTED TOKEN: " + token);
+       validate(token);
+       return token;
     }
     public String extractUserId(String token) {
         String userId = extractClaim(token, "userId", String.class);

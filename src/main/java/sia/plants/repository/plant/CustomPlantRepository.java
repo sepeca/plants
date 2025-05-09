@@ -17,5 +17,6 @@ public interface CustomPlantRepository {
             String temperatureRange,
             List<String> imageUrls
     );
+    void deletePlantCascade(Integer plantId);
 }
 

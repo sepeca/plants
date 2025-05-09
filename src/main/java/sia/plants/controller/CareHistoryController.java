@@ -2,8 +2,10 @@ package sia.plants.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sia.plants.DTO.ApiResponse;
 import sia.plants.DTO.careHistory.CareHistoryDTO;
 import sia.plants.DTO.careHistory.CreateCareHistoryRequest;
+import sia.plants.DTO.careHistory.DeleteCareHistoryRequest;
 import sia.plants.DTO.careHistory.UpdateCareHistoryRequest;
 import sia.plants.exception.NotFoundException;
 import sia.plants.model.CareHistory;
@@ -49,7 +51,8 @@ public class CareHistoryController {
     @PostMapping("/create_care_history")
     public ResponseEntity<?> createCareHistory(
             @RequestBody CreateCareHistoryRequest request,
-            @CookieValue("jwt") String token){
+            @RequestHeader("Authorization") String authHeader){
+        String token = jwtService.extractToken(authHeader);
         Plant plant = plantRepository.findById(request.getPlantId())
                 .orElseThrow(() -> new IllegalArgumentException("Plant not found"));
         UUID userId = request.getUserId();
@@ -74,12 +77,13 @@ public class CareHistoryController {
             return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
         }
     }
-    @PutMapping("/update_care_history/{id}")
+    @PutMapping("/update_care_history/")
     public ResponseEntity<?> updateCareHistory(
-            @PathVariable Integer id,
+
             @RequestBody UpdateCareHistoryRequest request,
-            @CookieValue("jwt") String token
-    ) {
+            @RequestHeader("Authorization") String authHeader){
+        String token = jwtService.extractToken(authHeader);
+        int id = request.getCareHistoryId();
         try {
             jwtService.validate(token);
             UUID currentUserId = UUID.fromString(jwtService.extractUserId(token));
@@ -96,8 +100,8 @@ public class CareHistoryController {
     @GetMapping("/care_history_by_plant/{id}")
     public ResponseEntity<?> getPlantDetail(
             @PathVariable Integer id,
-            @CookieValue("jwt") String token
-    ){
+            @RequestHeader("Authorization") String authHeader){
+        String token = jwtService.extractToken(authHeader);
         UUID orgId = UUID.fromString(jwtService.extractOrganizationId(token));
 
         Plant plant = plantRepository.findById(id)
@@ -112,14 +116,18 @@ public class CareHistoryController {
     @GetMapping("/care_history_my")
     public ResponseEntity<?> getPlantDetail(
 
-            @CookieValue("jwt") String token
-    ){
-        if (!jwtService.validateToken(token)) {
-            throw new IllegalArgumentException("Invalid token");
-        }
+            @RequestHeader("Authorization") String authHeader){
+        String token = jwtService.extractToken(authHeader);
         UUID uuid = UUID.fromString(jwtService.extractUserId(token));
         List<CareHistoryDTO> dto = careService.getCareHistoryByUserId(uuid);
         return ResponseEntity.ok(dto);
     }
-
+    @DeleteMapping("/care_history_delete")
+    public ResponseEntity<?> deleteCareHistory(
+            @RequestBody DeleteCareHistoryRequest request,
+            @RequestHeader("Authorization") String authHeader){
+        String token = jwtService.extractToken(authHeader);
+        UUID deleterId = UUID.fromString(jwtService.extractUserId(token));
+        return ResponseEntity.ok(ApiResponse.success());
+    }
 }

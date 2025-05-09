@@ -2,8 +2,11 @@ package sia.plants.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sia.plants.DTO.ApiResponse;
 import sia.plants.DTO.plant.CreatePlantRequest;
 import sia.plants.DTO.plant.PlantDetailDTO;
+import sia.plants.DTO.plant.PlantDetailRequest;
+import sia.plants.DTO.task.DeletePlantRequest;
 import sia.plants.exception.NotFoundException;
 import sia.plants.model.plant.Plant;
 import sia.plants.model.plant.PlantInfo;
@@ -37,20 +40,19 @@ public class PlantController {
         this.plantService = plantService;
     }
     @GetMapping("/get_plants")
-    public ResponseEntity<?> getPlants(@CookieValue("jwt") String token){
-        jwtService.validate(token);
+    public ResponseEntity<?> getPlants(@RequestHeader("Authorization") String authHeader){
+        String token = jwtService.extractToken(authHeader);
         String orgIdFromToken = jwtService.extractOrganizationId(token);
         UUID organizationId = UUID.fromString(orgIdFromToken);
-        //TODO: отправлять PlantDetailDTO
+
         return ResponseEntity.ok(plantService.getAllPlantByOrgId(organizationId));
     }
 
     @GetMapping("/plant_detail/{id}")
     public ResponseEntity<?> getPlantDetail(
             @PathVariable Integer id,
-            @CookieValue("jwt") String token
-    ) {
-        jwtService.validate(token);
+            @RequestHeader("Authorization") String authHeader) {
+        String token = jwtService.extractToken(authHeader);
 
         String orgIdFromToken = jwtService.extractOrganizationId(token);
 
@@ -60,41 +62,15 @@ public class PlantController {
         if (!plant.getOrganization().getOrganizationId().toString().equals(orgIdFromToken)) {
             throw new IllegalArgumentException("You are not allowed to access this plant");
         }
-        //TODO: перенести логику ДТО в сервис
-        PlantDetailDTO dto = new PlantDetailDTO();
-        dto.setId(plant.getPlantId());
-        dto.setName(plant.getName());
-        dto.setSpecies(plant.getSpecies());
 
-        if (plant.getOrganization() != null)
-            dto.setOrganizationName(plant.getOrganization().getName());
 
-        if (plant.getLocation() != null)
-            dto.setLocationName(plant.getLocation().getName());
 
-        if (plant.getPlantCategory() != null)
-            dto.setCategoryName(plant.getPlantCategory().getName());
-
-        if (plant.getPlantInfo() != null) {
-            dto.setHumidity(plant.getPlantInfo().getHumidity());
-            dto.setLightRequirements(plant.getPlantInfo().getLightRequirements());
-            dto.setTemperatureRange(plant.getPlantInfo().getTemperatureRange());
-            dto.setWater(plant.getPlantInfo().getWater());
-        }
-
-        List<String> urls = imageRepository.findAllByPlant_PlantId(plant.getPlantId())
-                .stream()
-                .map(Image::getUrl)
-                .toList();
-
-        dto.setImageUrls(urls);
-
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(plantService.getPlantDetail(plant.getPlantId()));
     }
-    @PostMapping("/plant")
+    @PostMapping("/add_plant")
     public ResponseEntity<String> createSmartPlant(@RequestBody CreatePlantRequest request,
-                                                   @CookieValue("jwt") String token) {
-        jwtService.validate(token);
+                                                   @RequestHeader("Authorization") String authHeader) {
+        String token = jwtService.extractToken(authHeader);
 
         Boolean isAdmin = jwtService.extractIsAdmin(token);
         if (!Boolean.TRUE.equals(isAdmin)) {
@@ -112,6 +88,21 @@ public class PlantController {
 
             throw new RuntimeException(e.getMessage(), e);
         }
+    }
+    @DeleteMapping("/delete_plant")
+    public ResponseEntity<?> deletePlant(
+                                         @RequestBody DeletePlantRequest request,
+                                         @RequestHeader("Authorization") String authHeader) {
+            String token = jwtService.extractToken(authHeader);
+        Boolean isAdmin = jwtService.extractIsAdmin(token);
+        if (!Boolean.TRUE.equals(isAdmin)) {
+            throw new IllegalArgumentException("Only admins can delete flowers");
+        }
+
+            plantService.deletePlant(request.getPlantId());
+
+            return ResponseEntity.ok(ApiResponse.success());
+
     }
 
 }

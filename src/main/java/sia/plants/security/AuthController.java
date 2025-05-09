@@ -5,6 +5,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sia.plants.DTO.ApiResponse;
 import sia.plants.DTO.user.*;
 import sia.plants.entities.UserOrgView;
 import sia.plants.model.Organization;
@@ -32,70 +33,46 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(
-            @RequestParam String email,
-            @RequestParam String password,
-            HttpServletResponse response
-    ){
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        String email = request.getEmail();
+        String password = request.getPassword();
         User user = userService.authenticate(email, password);
         String token = jwtService.generateToken(user);
 
-        ResponseCookie cookie = ResponseCookie.from("jwt", token)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .sameSite("Lax")
-                .maxAge(86400)
-                .build();
+        Map<String, String> response = new HashMap<>();
+        response.put("token", token);
 
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-        return ResponseEntity.ok("Logged in");
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletResponse response) {
-        ResponseCookie cookie = ResponseCookie.from("jwt", "")
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .sameSite("Lax")
-                .maxAge(0) // Удаляем cookie
-                .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-        return ResponseEntity.ok("Logged out");
+    public ResponseEntity<ApiResponse> logout(HttpServletResponse response,
+                                              @RequestHeader("Authorization") String authHeader) {
+        String token = jwtService.extractToken(authHeader);
+        jwtService.blacklistToken(token);
+        return  ResponseEntity.ok(ApiResponse.success());
     }
 
     @PostMapping("/register_self")
     public ResponseEntity<?> registerUser(@RequestBody CreateUserWithOrganizationRequest request) {
-            User newUser = userService.registerUserWithOrganization(request);
-            String token = jwtService.generateToken(newUser);
+        userService.registerUserWithOrganization(request);
 
-            ResponseCookie cookie = ResponseCookie.from("jwt", token)
-                    .httpOnly(true)
-                    .secure(true)
-                    .path("/")
-                    .sameSite("Lax")
-                    .maxAge(86400)
-                    .build();
 
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                    .body("Registered and logged in successfully");
+        return ResponseEntity.ok(ApiResponse.success());
 
     }
     @PostMapping("/register_worker")
     public ResponseEntity<?> createUser(
             @RequestBody CreateUserRequest request,
-            @CookieValue("jwt") String token
+            @RequestHeader("Authorization") String authHeader
     ) {
+        String token = authHeader.substring(7);
         jwtService.validate(token);
 
         Boolean isAdmin = jwtService.extractIsAdmin(token);
         if (!Boolean.TRUE.equals(isAdmin)) {
             throw new IllegalArgumentException("Only admins can create users");
         }
-
 
         if (request.getOrganizationId() == null) {
             String orgId = jwtService.extractOrganizationId(token);
@@ -109,9 +86,9 @@ public class AuthController {
     }
     @GetMapping("/profile")
     public ResponseEntity<?> profile(
-            @CookieValue("jwt") String token
+            @RequestHeader("Authorization") String authHeader
     ) {
-        jwtService.validate(token);
+        String token = jwtService.extractToken(authHeader);
 
         UUID userId = UUID.fromString(jwtService.extractUserId(token));
         UserOrgView info = userService.getCurrentUserInfo(userId);
@@ -119,37 +96,35 @@ public class AuthController {
         return ResponseEntity.ok(info);
     }
     @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(
+    public ResponseEntity<ApiResponse> updateProfile(
             @RequestBody UpdateUserRequest request,
-            @CookieValue("jwt") String token
+            @RequestHeader("Authorization") String authHeader
     ) {
-        jwtService.validate(token);
+
+
+        String token = jwtService.extractToken(authHeader);
 
         String userId = jwtService.extractUserId(token);
         userService.updateCurrentUser(userId, request);
-        return ResponseEntity.ok("User updated successfully");
+        return ResponseEntity.ok(ApiResponse.success());
     }
-    @GetMapping("api/org_members")
-    public ResponseEntity<?> getOrgMembers(@CookieValue("jwt") String token) {
-        jwtService.validate(token);
+    @GetMapping("api/get_users")
+    public ResponseEntity<?> getOrgMembers(@RequestHeader("Authorization") String authHeader) {
+        String token = jwtService.extractToken(authHeader);
 
         String orgIdStr = jwtService.extractOrganizationId(token);
-        if (orgIdStr == null) {
-            return ResponseEntity.status(400).body("Organization ID not found in token");
-        }
+
 
         UUID orgId = UUID.fromString(orgIdStr);
         List<OrgMemberResponse> members = userService.getOrgMembers(orgId);
         return ResponseEntity.ok(members);
     }
     @GetMapping("api/get_organization")
-    public ResponseEntity<?> getOrganizationName(@CookieValue("jwt") String token){
-        jwtService.validate(token);
+    public ResponseEntity<?> getOrganizationName(@RequestHeader("Authorization") String authHeader){
+        String token = jwtService.extractToken(authHeader);
 
         String orgIdStr = jwtService.extractOrganizationId(token);
-        if (orgIdStr == null) {
-            return ResponseEntity.status(400).body("Organization ID not found in token");
-        }
+
         UUID orgId = UUID.fromString(orgIdStr);
         Organization organization = organizationRepository.findById(orgId)
                 .orElseThrow(() -> new IllegalArgumentException("Organization not found"));
@@ -158,6 +133,28 @@ public class AuthController {
         response.put("organizationName", organization.getName());
         return ResponseEntity.ok(response);
     }
+    @PutMapping("api/toggle_admin")
+    public  ResponseEntity<ApiResponse> toggleAdmin(@RequestHeader("Authorization") String authHeader,
+                                                    @RequestBody ToggleAdminRequest request){
+        String token = jwtService.extractToken(authHeader);
+        String orgIdStr = jwtService.extractOrganizationId(token);
 
+        UUID orgId = UUID.fromString(orgIdStr);
+        userService.toggleAdmin(orgId, request);
 
+        return  ResponseEntity.ok(ApiResponse.success());
+    }
+    @DeleteMapping("api/delete_users")
+    public ResponseEntity<ApiResponse> deleteUser(@RequestHeader("Authorization") String authHeader,
+                                                  @RequestBody DeleteUserRequest request){
+        String token = jwtService.extractToken(authHeader);
+        Boolean isAdmin = jwtService.extractIsAdmin(token);
+        UUID userId = UUID.fromString(request.getUserId());
+        System.out.println(userId);
+        if(!isAdmin){
+            throw new RuntimeException("Only Admins can delete users");
+        }
+        userService.deleteUser(userId);
+        return ResponseEntity.ok(ApiResponse.success());
+    }
 }

@@ -1,21 +1,20 @@
 package sia.plants.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.sql.Timestamp;
 import java.util.UUID;
 
 @Entity
 @Table(name = "user_task_view")
+@IdClass(UserTaskViewId.class)
 public class UserTaskView {
 
     @Id
     @Column(name = "taskid")
     private Integer taskId;
 
+    @Id
     @Column(name = "userid")
     private UUID userId;
 
@@ -39,6 +38,17 @@ public class UserTaskView {
 
     @Column(name = "plant_species")
     private String plantSpecies;
+
+
+    @Column(name = "care_taker")
+    private String careTaker;
+
+    public String getLocationName() {
+        return locationName;
+    }
+
+    @Column(name = "location_name")
+    private String locationName;
 
     // Getters and Setters
 
@@ -89,7 +99,9 @@ public class UserTaskView {
     public void setTaskDescription(String taskDescription) {
         this.taskDescription = taskDescription;
     }
-
+    public String getCareTaker() {
+        return careTaker;
+    }
     public Integer getPlantId() {
         return plantId;
     }

@@ -21,23 +21,20 @@ public class JwtAuthFilter extends GenericFilter {
             throws IOException, ServletException {
 
         HttpServletRequest request = (HttpServletRequest) req;
+        String authHeader = request.getHeader("Authorization");
 
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                System.out.println("Found cookie: " + cookie.getName());
-                if ("jwt".equals(cookie.getName())) {
-                    String token = cookie.getValue();
-                    if (jwtService.validateToken(token)) {
-                        String userId = jwtService.extractUserId(token);
-                        UsernamePasswordAuthenticationToken auth =
-                                new UsernamePasswordAuthenticationToken(userId, null, null);
-                        SecurityContextHolder.getContext().setAuthentication(auth);
-                        break;
-                    }
-                }
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7); // Удаляем "Bearer "
+
+            if (jwtService.validateToken(token)) {
+                String userId = jwtService.extractUserId(token);
+                UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(userId, null, null);
+                SecurityContextHolder.getContext().setAuthentication(auth);
             }
         }
 
         chain.doFilter(req, res);
     }
 }
+

@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Data
 public class CreateCareHistoryRequest {
-    private Timestamp careDate;
+
     private String imageUrl;
     private String notes;
 

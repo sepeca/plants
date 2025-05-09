@@ -1,5 +1,6 @@
 package sia.plants.DTO.user;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.UUID;
@@ -7,6 +8,7 @@ import java.util.UUID;
 @Data
 public class CreateUserRequest {
     private String email;
+    @JsonProperty("username")
     private String name;
     private String password;
 
