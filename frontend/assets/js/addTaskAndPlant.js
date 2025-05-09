@@ -67,9 +67,28 @@ $(document).ready(async function () {
         }
     }
 
-    async function submitPlant(plantName, species, locationName, categoryName, humidity, lightRequirements, water, temperatureRange, imageUrls) {
+    async function submitPlant(plantName, species, locationName, categoryName, humidity, lightRequirements, water, temperatureRange, images) {
         try {
-            const body = {
+            if (images.length > 3) {
+                showNotification('You can upload a maximum of 3 images.',false);
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('plantName', plantName);
+            formData.append('species', species);
+            formData.append('locationName', locationName);
+            formData.append('categoryName', categoryName);
+            formData.append('humidity', humidity);
+            formData.append('lightRequirements', lightRequirements);
+            formData.append('water', water);
+            formData.append('temperatureRange', temperatureRange);
+
+            images.forEach((image, index) => {
+                formData.append(`images[${index}]`, image); // Append each image file
+            });
+
+            console.log('Submitting plant data:', {
                 plantName,
                 species,
                 locationName,
@@ -77,19 +96,16 @@ $(document).ready(async function () {
                 humidity,
                 lightRequirements,
                 water,
-                temperatureRange
-            };
-            if (imageUrls.length > 0) {
-                body.imageUrls = imageUrls; // Only include imageUrls if not empty
-            }
+                temperatureRange,
+                images: images.map(image => image.name) // Log image file names
+            });
 
             const response = await fetch(`${SERVER_ADDRESS}/api/add_plant`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify(body)
+                body: formData
             });
             if (!response.ok) throw new Error('Failed to create plant');
             alert('Plant created successfully!');
@@ -156,18 +172,32 @@ $(document).ready(async function () {
 
     async function submitCareHistory(plantId, careTypeId, notes, image) {
         try {
-            const body = { plantId, careTypeId, notes };
-            if (image) {
-                body.image = image; // Only include image if it's not empty
+            if (image && image.length > 1) {
+                alert('You can upload a maximum of 1 image for care history.');
+                return;
             }
+
+            const formData = new FormData();
+            formData.append('plantId', plantId);
+            formData.append('careTypeId', careTypeId);
+            formData.append('notes', notes);
+            if (image) {
+                formData.append('image', image); // Append the image file
+            }
+
+            console.log('Submitting care history data:', {
+                plantId,
+                careTypeId,
+                notes,
+                image: image ? image.name : null // Log image file name if present
+            });
 
             const response = await fetch(`${SERVER_ADDRESS}/api/create_care_history`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify(body)
+                body: formData
             });
             if (!response.ok) throw new Error('Failed to create care history');
             alert('Care history entry created successfully!');
@@ -214,17 +244,14 @@ $(document).ready(async function () {
         const lightRequirements = document.querySelector('#light-requirements').value.trim();
         const water = document.querySelector('#water').value.trim();
         const temperatureRange = document.querySelector('#temperature-range').value.trim();
-        const imageUrls = document.querySelector('#image-urls').value
-            .split(',')
-            .map(url => url.trim())
-            .filter(url => url);
+        const images = Array.from(document.querySelector('#images').files); // Get image files
 
         if (!plantName || !species || !locationName || !categoryName || !humidity || !lightRequirements || !water || !temperatureRange) {
-            alert('All fields except Image URLs are required.');
+            alert('All fields except Images are required.');
             return;
         }
 
-        await submitPlant(plantName, species, locationName, categoryName, humidity, lightRequirements, water, temperatureRange, imageUrls);
+        await submitPlant(plantName, species, locationName, categoryName, humidity, lightRequirements, water, temperatureRange, images);
     });
 
     // Update the form HTML
@@ -253,8 +280,8 @@ $(document).ready(async function () {
         <label for="temperature-range">Temperature Range:</label>
         <input type="text" id="temperature-range" name="temperature-range" required>
 
-        <label for="image-urls">Image URLs (comma-separated):</label>
-        <textarea id="image-urls" name="image-urls" rows="3"></textarea>
+        <label for="images">Images:</label>
+        <input type="file" id="images" name="images" multiple>
 
         <button type="submit" style="background-color: #6a994e; color: white; border: none; padding: 10px 20px; font-size: 1em; border-radius: 5px; cursor: pointer;">Add Plant</button>
     `;
@@ -362,7 +389,9 @@ $(document).ready(async function () {
                                         <td>${history.careTypeName}</td>
                                         <td>${history.notes || 'No notes provided'}</td>
                                         <td>${history.userName} (${history.userEmail})</td>
-                                        <td>${history.imageUrl ? `<a href="${history.imageUrl}" target="_blank">View</a>` : 'No image'}</td>
+                                        <td>
+                                            ${history.imageUrl ? `<button onclick="showCareHistoryImage('${history.imageUrl}', this)">Show Image</button>` : 'No image'}
+                                        </td>
                                         <td>
                                             <button onclick="deleteCareHistory(${history.careHistoryId}, this)">DEL</button> <!-- DEL button -->
                                         </td>
@@ -402,7 +431,9 @@ $(document).ready(async function () {
                             ${plantDetails.imageUrls?.length ? `
                             <tr>
                                 <td class="label">Images</td>
-                                <td class="value">${plantDetails.imageUrls.map(url => `<a href="${url}" target="_blank">View</a>`).join(', ')}</td>
+                                <td class="value">
+                                    ${plantDetails.imageUrls.map(url => `<button onclick="showPlantImage('${url}', this)">Show Image</button>`).join(' ')}
+                                </td>
                             </tr>` : ''}
                         </table>
                     </div>
@@ -418,8 +449,8 @@ $(document).ready(async function () {
                             `).join('')}
                             <label for="notes-${plantId}">Notes:</label>
                             <textarea id="notes-${plantId}" name="notes" rows="3"></textarea>
-                            <label for="image-${plantId}">Image URL:</label>
-                            <input type="text" id="image-${plantId}" name="image">
+                            <label for="image-${plantId}">Image:</label>
+                            <input type="file" id="image-${plantId}" name="image" accept="image/*">
                             <button type="submit" style="background-color: #6a994e; color: white; border: none; padding: 10px 20px; font-size: 1em; border-radius: 5px; cursor: pointer;">Submit</button>
                         </form>
                     </div>
@@ -432,7 +463,7 @@ $(document).ready(async function () {
                 event.preventDefault();
                 const careTypeId = parseInt(this.querySelector('input[name="careTypeId"]:checked').value);
                 const notes = this.querySelector(`#notes-${plantId}`).value.trim();
-                const image = this.querySelector(`#image-${plantId}`).value.trim();
+                const image = this.querySelector(`#image-${plantId}`).files[0]; // Get the selected image file
                 await submitCareHistory(plantId, careTypeId, notes, image);
                 viewDetails(plantId); // Refresh details
             });
@@ -444,6 +475,42 @@ $(document).ready(async function () {
             };
         } catch (error) {
             console.error('Error loading details:', error.message);
+        }
+    };
+
+    window.showPlantImage = async function (url, button) {
+        const parentRow = button.closest('tr');
+        let imageRow = parentRow.nextElementSibling;
+
+        if (imageRow && imageRow.classList.contains('image-row')) {
+            imageRow.remove();
+        } else {
+            imageRow = document.createElement('tr');
+            imageRow.classList.add('image-row');
+            imageRow.innerHTML = `
+                <td colspan="2">
+                    <img src="${url}" style="max-width: 120px; height: auto;" alt="Plant Image">
+                </td>
+            `;
+            parentRow.insertAdjacentElement('afterend', imageRow);
+        }
+    };
+
+    window.showCareHistoryImage = async function (url, button) {
+        const parentRow = button.closest('tr');
+        let imageRow = parentRow.nextElementSibling;
+
+        if (imageRow && imageRow.classList.contains('image-row')) {
+            imageRow.remove();
+        } else {
+            imageRow = document.createElement('tr');
+            imageRow.classList.add('image-row');
+            imageRow.innerHTML = `
+                <td colspan="6">
+                    <img src="${url}" style="max-width: 300px; height: auto;" alt="Care History Image">
+                </td>
+            `;
+            parentRow.insertAdjacentElement('afterend', imageRow);
         }
     };
 
