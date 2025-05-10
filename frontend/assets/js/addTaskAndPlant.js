@@ -61,15 +61,21 @@ $(document).ready(async function () {
                 body: JSON.stringify(body)
             });
             if (!response.ok) throw new Error('Failed to create task');
-            alert('Task created successfully!');
+            showNotification('Task created successfully!',true);
         } catch (error) {
             console.error('Error creating task:', error.message);
         }
     }
 
-    async function submitPlant(plantName, species, locationName, categoryName, humidity, lightRequirements, water, temperatureRange, imageUrls) {
+    async function submitPlant(plantName, species, locationName, categoryName, humidity, lightRequirements, water, temperatureRange, images) {
         try {
-            const body = {
+            if (images.length > 3) {
+                showNotification('You can upload a maximum of 3 images.', false);
+                return;
+            }
+
+            const formData = new FormData();
+            const plantData = {
                 plantName,
                 species,
                 locationName,
@@ -79,20 +85,32 @@ $(document).ready(async function () {
                 water,
                 temperatureRange
             };
-            if (imageUrls.length > 0) {
-                body.imageUrls = imageUrls; // Only include imageUrls if not empty
-            }
+
+            const jsonBlob = new Blob(
+                [JSON.stringify(plantData)],
+                { type: 'application/json' }
+            );
+
+            formData.append('plantData', jsonBlob); // Append JSON blob for plant data
+
+            images.forEach((image) => {
+                formData.append(`plantImages`, image); // Append each image file
+            });
+
+            console.log('Submitting plant data:', {
+                plantData,
+                plantImages: images.map(image => image.name) // Log image names for debugging
+            });
 
             const response = await fetch(`${SERVER_ADDRESS}/api/add_plant`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify(body)
+                body: formData
             });
             if (!response.ok) throw new Error('Failed to create plant');
-            alert('Plant created successfully!');
+            showNotification('Plant created successfully!',true);
             location.reload(); // Reload the page to update the table
         } catch (error) {
             console.error('Error creating plant:', error.message);
@@ -156,21 +174,43 @@ $(document).ready(async function () {
 
     async function submitCareHistory(plantId, careTypeId, notes, image) {
         try {
-            const body = { plantId, careTypeId, notes };
-            if (image) {
-                body.image = image; // Only include image if it's not empty
+            if (image && image.length > 1) {
+                showNotification('You can upload a maximum of 1 image for care history.', false);
+                return;
             }
+
+            const careData = {
+                plantId,
+                careTypeId,
+                notes
+            };
+
+            const formData = new FormData();
+            const jsonBlob = new Blob(
+                [JSON.stringify(careData)],
+                { type: 'application/json' }
+            );
+
+            formData.append('careData', jsonBlob); // Append JSON blob for care data
+
+            if (image) {
+                formData.append('careImage', image); // Append the image file
+            }
+
+            console.log('Submitting care history data:', {
+                careData: JSON.stringify(careData), // Log careData as JSON
+                careImage: image ? image.name : null // Log image file name if present
+            });
 
             const response = await fetch(`${SERVER_ADDRESS}/api/create_care_history`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify(body)
+                body: formData
             });
             if (!response.ok) throw new Error('Failed to create care history');
-            alert('Care history entry created successfully!');
+            showNotification('Care history entry created successfully!',true);
         } catch (error) {
             console.error('Error creating care history:', error.message);
         }
@@ -192,15 +232,15 @@ $(document).ready(async function () {
             });
 
             if (response.ok) {
-                alert('Plant deleted successfully!');
+                showNotification('Plant deleted successfully!', true);
                 button.closest('tr').remove(); // Remove the plant row from the table
             } else {
                 const errorData = await response.json();
-                alert(`Failed to delete plant: ${errorData.message || 'Unknown error'}`);
+                showNotification(`Failed to delete plant: ${errorData.message || 'Unknown error'}`, false);
             }
         } catch (error) {
             console.error('Error deleting plant:', error.message);
-            alert('An error occurred. Please try again later.');
+            showNotification('An error occurred. Please try again later.',false);
         }
     };
 
@@ -214,17 +254,14 @@ $(document).ready(async function () {
         const lightRequirements = document.querySelector('#light-requirements').value.trim();
         const water = document.querySelector('#water').value.trim();
         const temperatureRange = document.querySelector('#temperature-range').value.trim();
-        const imageUrls = document.querySelector('#image-urls').value
-            .split(',')
-            .map(url => url.trim())
-            .filter(url => url);
+        const images = Array.from(document.querySelector('#images').files); // Get image files
 
         if (!plantName || !species || !locationName || !categoryName || !humidity || !lightRequirements || !water || !temperatureRange) {
-            alert('All fields except Image URLs are required.');
+            showNotification('All fields except Images are required.',false);
             return;
         }
 
-        await submitPlant(plantName, species, locationName, categoryName, humidity, lightRequirements, water, temperatureRange, imageUrls);
+        await submitPlant(plantName, species, locationName, categoryName, humidity, lightRequirements, water, temperatureRange, images);
     });
 
     // Update the form HTML
@@ -253,8 +290,8 @@ $(document).ready(async function () {
         <label for="temperature-range">Temperature Range:</label>
         <input type="text" id="temperature-range" name="temperature-range" required>
 
-        <label for="image-urls">Image URLs (comma-separated):</label>
-        <textarea id="image-urls" name="image-urls" rows="3"></textarea>
+        <label for="images">Images:</label>
+        <input type="file" id="images" name="images" multiple>
 
         <button type="submit" style="background-color: #6a994e; color: white; border: none; padding: 10px 20px; font-size: 1em; border-radius: 5px; cursor: pointer;">Add Plant</button>
     `;
@@ -313,7 +350,7 @@ $(document).ready(async function () {
         const includeMe = event.target.querySelector(`[name="task-include-me"]`).checked;
 
         if (!taskDetails || !taskTime) {
-            alert('Task details and time are required.');
+            showNotification('Task details and time are required.',false);
             return;
         }
 
@@ -347,10 +384,10 @@ $(document).ready(async function () {
                             <tr>
                                 <th>Date</th>
                                 <th>Type</th>
-                                <th>Notes</th>
-                                <th>User</th>
+                                <th class="notes-column">Notes</th> <!-- Add class for notes column -->
+                                <th class="user-column" >User</th>
                                 <th>Image</th>
-                                <th>Action</th> <!-- New column for actions -->
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -360,11 +397,13 @@ $(document).ready(async function () {
                                     <tr>
                                         <td>${history.careDate.split('T')[0]}</td>
                                         <td>${history.careTypeName}</td>
-                                        <td>${history.notes || 'No notes provided'}</td>
+                                        <td class="notes-column">${history.notes || 'No notes provided'}</td> <!-- Apply class -->
                                         <td>${history.userName} (${history.userEmail})</td>
-                                        <td>${history.imageUrl ? `<a href="${history.imageUrl}" target="_blank">View</a>` : 'No image'}</td>
                                         <td>
-                                            <button onclick="deleteCareHistory(${history.careHistoryId}, this)">DEL</button> <!-- DEL button -->
+                                            ${history.imageUrl ? `<button onclick="showCareHistoryImage('${history.imageUrl}', this)">Show Image</button>` : 'No image'}
+                                        </td>
+                                        <td>
+                                            <button onclick="deleteCareHistory(${history.careHistoryId}, this)">DEL</button>
                                         </td>
                                     </tr>
                                 `).join('')}
@@ -402,7 +441,9 @@ $(document).ready(async function () {
                             ${plantDetails.imageUrls?.length ? `
                             <tr>
                                 <td class="label">Images</td>
-                                <td class="value">${plantDetails.imageUrls.map(url => `<a href="${url}" target="_blank">View</a>`).join(', ')}</td>
+                                <td class="value">
+                                    ${plantDetails.imageUrls.map(url => `<button onclick="showPlantImage('${url}', this)">Show Image</button>`).join(' ')}
+                                </td>
                             </tr>` : ''}
                         </table>
                     </div>
@@ -418,8 +459,8 @@ $(document).ready(async function () {
                             `).join('')}
                             <label for="notes-${plantId}">Notes:</label>
                             <textarea id="notes-${plantId}" name="notes" rows="3"></textarea>
-                            <label for="image-${plantId}">Image URL:</label>
-                            <input type="text" id="image-${plantId}" name="image">
+                            <label for="image-${plantId}">Image:</label>
+                            <input type="file" id="image-${plantId}" name="image" accept="image/*">
                             <button type="submit" style="background-color: #6a994e; color: white; border: none; padding: 10px 20px; font-size: 1em; border-radius: 5px; cursor: pointer;">Submit</button>
                         </form>
                     </div>
@@ -432,7 +473,7 @@ $(document).ready(async function () {
                 event.preventDefault();
                 const careTypeId = parseInt(this.querySelector('input[name="careTypeId"]:checked').value);
                 const notes = this.querySelector(`#notes-${plantId}`).value.trim();
-                const image = this.querySelector(`#image-${plantId}`).value.trim();
+                const image = this.querySelector(`#image-${plantId}`).files[0]; // Get the selected image file
                 await submitCareHistory(plantId, careTypeId, notes, image);
                 viewDetails(plantId); // Refresh details
             });
@@ -444,6 +485,68 @@ $(document).ready(async function () {
             };
         } catch (error) {
             console.error('Error loading details:', error.message);
+        }
+    };
+
+    window.showPlantImage = async function (url, button) {
+        const parentRow = button.closest('tr');
+        let imageRow = parentRow.nextElementSibling;
+
+        if (imageRow && imageRow.classList.contains('image-row')) {
+            imageRow.remove();
+        } else {
+            try {
+                const response = await fetch(`${SERVER_ADDRESS}${url}`, {
+                    method: 'GET',
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error('Failed to fetch plant image');
+
+                const blob = await response.blob();
+                const imageUrl = URL.createObjectURL(blob);
+
+                imageRow = document.createElement('tr');
+                imageRow.classList.add('image-row');
+                imageRow.innerHTML = `
+                    <td colspan="2">
+                        <img src="${imageUrl}" style="max-width: 500px; height: auto;" alt="Plant Image">
+                    </td>
+                `;
+                parentRow.insertAdjacentElement('afterend', imageRow);
+            } catch (error) {
+                console.error('Error fetching plant image:', error.message);
+            }
+        }
+    };
+
+    window.showCareHistoryImage = async function (url, button) {
+        const parentRow = button.closest('tr');
+        let imageRow = parentRow.nextElementSibling;
+
+        if (imageRow && imageRow.classList.contains('image-row')) {
+            imageRow.remove();
+        } else {
+            try {
+                const response = await fetch(`${SERVER_ADDRESS}${url}`, {
+                    method: 'GET',
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error('Failed to fetch care history image');
+
+                const blob = await response.blob();
+                const imageUrl = URL.createObjectURL(blob);
+
+                imageRow = document.createElement('tr');
+                imageRow.classList.add('image-row');
+                imageRow.innerHTML = `
+                    <td colspan="6">
+                        <img src="${imageUrl}" style="max-width: 500px; height: auto;" alt="Care History Image">
+                    </td>
+                `;
+                parentRow.insertAdjacentElement('afterend', imageRow);
+            } catch (error) {
+                console.error('Error fetching care history image:', error.message);
+            }
         }
     };
 
@@ -461,15 +564,15 @@ $(document).ready(async function () {
             });
 
             if (response.ok) {
-                alert('Care history entry deleted successfully!');
+                showNotification('Care history entry deleted successfully!', true);
                 button.closest('tr').remove(); // Remove the care history row from the table
             } else {
                 const errorData = await response.json();
-                alert(`Failed to delete care history: ${errorData.message || 'Unknown error'}`);
+                showNotification(`Failed to delete care history: ${errorData.message || 'Unknown error'}`, false);
             }
         } catch (error) {
             console.error('Error deleting care history:', error.message);
-            alert('An error occurred. Please try again later.');
+            showNotification('An error occurred. Please try again later.', false);
         }
     };
 });

@@ -203,3 +203,9 @@ button[type="submit"]:hover {
     background-color: #6a994e; /* Green background for headers */
     color: white; /* White text for headers */
 }
+
+.notes-column, .user-column {
+    max-width: 190px;
+    word-wrap: break-word;
+    white-space: normal;
+}

@@ -9,7 +9,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
     const confirmPassword = document.getElementById('confirm-password').value;
 
     if (password !== confirmPassword) {
-        alert('Passwords do not match.');
+        showNotification('Passwords do not match.',false);
         return;
     }
 
@@ -25,10 +25,10 @@ document.getElementById('register-form').addEventListener('submit', async functi
         if (data.status === "success") {
             window.location.href = './login.html'; // Redirect to login
         } else {
-            alert(`Registration failed: ${data.message || 'Unknown error'}`);
+            showNotification(`Registration failed: ${data.message || 'Unknown error'}`, false);
         }
     } catch (error) {
         console.error('Error during registration:', error);
-        alert('An error occurred. Please try again later.');
+        showNotification('An error occurred. Please try again later.',false);
     }
 });

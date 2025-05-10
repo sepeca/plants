@@ -18,12 +18,6 @@ $(document).ready(async function () {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            if (!response.ok) {
-                alert('You do not have permission to access this page.');
-                window.location.href = './calendar.html';
-                return;
-            }
-
             const users = await response.json();
             users.forEach(user => {
                 const row = `
@@ -76,15 +70,15 @@ $(document).ready(async function () {
             });
 
             if (response.ok) {
-                alert('User role updated successfully!');
+                showNotification('User role updated successfully!',true);
                 location.reload(); // Reload the page to update the table
             } else {
                 const errorData = await response.json();
-                alert(`Failed to update user role: ${errorData.message || 'Unknown error'}`);
+                showNotification(`Failed to update user role: ${errorData.message || 'Unknown error'}`,false);
             }
         } catch (error) {
             console.error('Error toggling admin role:', error.message);
-            alert('An error occurred. Please try again later.');
+            showNotification('An error occurred. Please try again later.',false);
         }
     }
 
@@ -101,15 +95,15 @@ $(document).ready(async function () {
             });
 
             if (response.ok) {
-                alert('User deleted successfully!');
+                showNotification('User deleted successfully!',true);
                 location.reload(); // Reload the page to update the table
             } else {
                 const errorData = await response.json();
-                alert(`Failed to delete user: ${errorData.message || 'Unknown error'}`);
+                showNotification(`Failed to delete user: ${errorData.message || 'Unknown error'}`,false);
             }
         } catch (error) {
             console.error('Error deleting user:', error.message);
-            alert('An error occurred. Please try again later.');
+            showNotification('An error occurred. Please try again later.',false);
         }
     }
 
@@ -149,7 +143,7 @@ $(document).ready(async function () {
         const isAdmin = document.querySelector('#is-admin').checked;
 
         if (!name || !email || !password) {
-            alert('All fields are required.');
+            showNotification('All fields are required.',false);
             return;
         }
 
@@ -167,15 +161,15 @@ $(document).ready(async function () {
             });
 
             if (response.ok) {
-                alert('User added successfully!');
+                showNotification('User added successfully!',true);
                 location.reload(); // Reload the page to update the table
             } else {
                 const errorData = await response.json();
-                alert(`Failed to add user: ${errorData.message || 'Unknown error'}`);
+                showNotification(`Failed to add user: ${errorData.message || 'Unknown error'}`,false);
             }
         } catch (error) {
             console.error('Error adding user:', error.message);
-            alert('An error occurred. Please try again later.');
+            showNotification('An error occurred. Please try again later.',false);
         }
     });
 });
