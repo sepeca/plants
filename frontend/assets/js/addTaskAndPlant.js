@@ -61,7 +61,7 @@ $(document).ready(async function () {
                 body: JSON.stringify(body)
             });
             if (!response.ok) throw new Error('Failed to create task');
-            alert('Task created successfully!');
+            showNotification('Task created successfully!',true);
         } catch (error) {
             console.error('Error creating task:', error.message);
         }
@@ -110,7 +110,7 @@ $(document).ready(async function () {
                 body: formData
             });
             if (!response.ok) throw new Error('Failed to create plant');
-            alert('Plant created successfully!');
+            showNotification('Plant created successfully!',true);
             location.reload(); // Reload the page to update the table
         } catch (error) {
             console.error('Error creating plant:', error.message);
@@ -175,7 +175,7 @@ $(document).ready(async function () {
     async function submitCareHistory(plantId, careTypeId, notes, image) {
         try {
             if (image && image.length > 1) {
-                alert('You can upload a maximum of 1 image for care history.');
+                showNotification('You can upload a maximum of 1 image for care history.', false);
                 return;
             }
 
@@ -210,7 +210,7 @@ $(document).ready(async function () {
                 body: formData
             });
             if (!response.ok) throw new Error('Failed to create care history');
-            alert('Care history entry created successfully!');
+            showNotification('Care history entry created successfully!',true);
         } catch (error) {
             console.error('Error creating care history:', error.message);
         }
@@ -232,15 +232,15 @@ $(document).ready(async function () {
             });
 
             if (response.ok) {
-                alert('Plant deleted successfully!');
+                showNotification('Plant deleted successfully!', true);
                 button.closest('tr').remove(); // Remove the plant row from the table
             } else {
                 const errorData = await response.json();
-                alert(`Failed to delete plant: ${errorData.message || 'Unknown error'}`);
+                showNotification(`Failed to delete plant: ${errorData.message || 'Unknown error'}`, false);
             }
         } catch (error) {
             console.error('Error deleting plant:', error.message);
-            alert('An error occurred. Please try again later.');
+            showNotification('An error occurred. Please try again later.',false);
         }
     };
 
@@ -257,7 +257,7 @@ $(document).ready(async function () {
         const images = Array.from(document.querySelector('#images').files); // Get image files
 
         if (!plantName || !species || !locationName || !categoryName || !humidity || !lightRequirements || !water || !temperatureRange) {
-            alert('All fields except Images are required.');
+            showNotification('All fields except Images are required.',false);
             return;
         }
 
@@ -350,7 +350,7 @@ $(document).ready(async function () {
         const includeMe = event.target.querySelector(`[name="task-include-me"]`).checked;
 
         if (!taskDetails || !taskTime) {
-            alert('Task details and time are required.');
+            showNotification('Task details and time are required.',false);
             return;
         }
 
@@ -564,15 +564,15 @@ $(document).ready(async function () {
             });
 
             if (response.ok) {
-                alert('Care history entry deleted successfully!');
+                showNotification('Care history entry deleted successfully!', true);
                 button.closest('tr').remove(); // Remove the care history row from the table
             } else {
                 const errorData = await response.json();
-                alert(`Failed to delete care history: ${errorData.message || 'Unknown error'}`);
+                showNotification(`Failed to delete care history: ${errorData.message || 'Unknown error'}`, false);
             }
         } catch (error) {
             console.error('Error deleting care history:', error.message);
-            alert('An error occurred. Please try again later.');
+            showNotification('An error occurred. Please try again later.', false);
         }
     };
 });

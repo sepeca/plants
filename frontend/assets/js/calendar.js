@@ -16,6 +16,13 @@ $(document).ready(async function () {
         if (response.ok) {
             let tasks = await response.json();
 
+            // Filter new tasks (notified === false)
+            const newTasks = tasks.filter(task => task.notified === false);
+
+            if (newTasks.length > 0) {
+                showNewTasksModal(newTasks, token);
+            }
+
             tasks = tasks.map(task => {
                 console.log('Task before mapping:', task); // Debug log to inspect task data
                 task.plantSpecies = task.plantSpecies;
@@ -152,6 +159,49 @@ $(document).ready(async function () {
     } catch (error) {
         console.error('Error fetching tasks:', error);
         console.error('An error occurred. Please try again later.');
+    }
+
+    // Function to display the modal with new tasks
+    function showNewTasksModal(newTasks, token) {
+        const modalHtml = `
+            <div id="new-tasks-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000;">
+                <h1 style="color: red;">There are ${newTasks.length} new tasks:</h1>
+                <ul style="list-style: none; padding: 0; text-align: left;">
+                    ${newTasks.map(task => `
+                        <li>
+                            <strong>${task.plantName}</strong> - ${task.taskDate.split('T')[0]}<br>
+                            ${task.taskDescription || 'No description available.'}
+                        </li>
+                    `).join('')}
+                </ul>
+                <button id="notify-tasks-btn" style="margin-top: 20px; padding: 10px 20px; background: green; color: white; border: none; cursor: pointer;">Acknowledge</button>
+            </div>
+        `;
+
+        $('body').append(modalHtml);
+
+        $('#notify-tasks-btn').on('click', async function () {
+            const taskIds = newTasks.map(task => task.id);
+
+            try {
+                const response = await fetch(`${SERVER_ADDRESS}/api/notify_task`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ task_ids: taskIds })
+                });
+
+                if (response.ok) {
+                    $('#new-tasks-modal').remove(); // Hide the modal on success
+                } else {
+                    console.error('Failed to notify tasks. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error notifying tasks:', error);
+            }
+        });
     }
 
     function showTaskDetails(data) {
