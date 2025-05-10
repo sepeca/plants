@@ -384,10 +384,10 @@ $(document).ready(async function () {
                             <tr>
                                 <th>Date</th>
                                 <th>Type</th>
-                                <th>Notes</th>
+                                <th class="notes-column">Notes</th> <!-- Add class for notes column -->
                                 <th>User</th>
                                 <th>Image</th>
-                                <th>Action</th> <!-- New column for actions -->
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -397,13 +397,13 @@ $(document).ready(async function () {
                                     <tr>
                                         <td>${history.careDate.split('T')[0]}</td>
                                         <td>${history.careTypeName}</td>
-                                        <td>${history.notes || 'No notes provided'}</td>
+                                        <td class="notes-column">${history.notes || 'No notes provided'}</td> <!-- Apply class -->
                                         <td>${history.userName} (${history.userEmail})</td>
                                         <td>
                                             ${history.imageUrl ? `<button onclick="showCareHistoryImage('${history.imageUrl}', this)">Show Image</button>` : 'No image'}
                                         </td>
                                         <td>
-                                            <button onclick="deleteCareHistory(${history.careHistoryId}, this)">DEL</button> <!-- DEL button -->
+                                            <button onclick="deleteCareHistory(${history.careHistoryId}, this)">DEL</button>
                                         </td>
                                     </tr>
                                 `).join('')}
@@ -495,14 +495,27 @@ $(document).ready(async function () {
         if (imageRow && imageRow.classList.contains('image-row')) {
             imageRow.remove();
         } else {
-            imageRow = document.createElement('tr');
-            imageRow.classList.add('image-row');
-            imageRow.innerHTML = `
-                <td colspan="2">
-                    <img src="${url}" style="max-width: 350px; height: auto;" alt="Plant Image">
-                </td>
-            `;
-            parentRow.insertAdjacentElement('afterend', imageRow);
+            try {
+                const response = await fetch(`${SERVER_ADDRESS}${url}`, {
+                    method: 'GET',
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error('Failed to fetch plant image');
+
+                const blob = await response.blob();
+                const imageUrl = URL.createObjectURL(blob);
+
+                imageRow = document.createElement('tr');
+                imageRow.classList.add('image-row');
+                imageRow.innerHTML = `
+                    <td colspan="2">
+                        <img src="${imageUrl}" style="max-width: 500px; height: auto;" alt="Plant Image">
+                    </td>
+                `;
+                parentRow.insertAdjacentElement('afterend', imageRow);
+            } catch (error) {
+                console.error('Error fetching plant image:', error.message);
+            }
         }
     };
 
@@ -513,14 +526,27 @@ $(document).ready(async function () {
         if (imageRow && imageRow.classList.contains('image-row')) {
             imageRow.remove();
         } else {
-            imageRow = document.createElement('tr');
-            imageRow.classList.add('image-row');
-            imageRow.innerHTML = `
-                <td colspan="6">
-                    <img src="${url}" style="max-width: 350px; height: auto;" alt="Care History Image">
-                </td>
-            `;
-            parentRow.insertAdjacentElement('afterend', imageRow);
+            try {
+                const response = await fetch(`${SERVER_ADDRESS}${url}`, {
+                    method: 'GET',
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error('Failed to fetch care history image');
+
+                const blob = await response.blob();
+                const imageUrl = URL.createObjectURL(blob);
+
+                imageRow = document.createElement('tr');
+                imageRow.classList.add('image-row');
+                imageRow.innerHTML = `
+                    <td colspan="6">
+                        <img src="${imageUrl}" style="max-width: 500px; height: auto;" alt="Care History Image">
+                    </td>
+                `;
+                parentRow.insertAdjacentElement('afterend', imageRow);
+            } catch (error) {
+                console.error('Error fetching care history image:', error.message);
+            }
         }
     };
 
