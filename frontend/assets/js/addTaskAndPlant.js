@@ -179,19 +179,27 @@ $(document).ready(async function () {
                 return;
             }
 
+            const careData = {
+                plantId,
+                careTypeId,
+                notes
+            };
+
             const formData = new FormData();
-            formData.append('plantId', plantId);
-            formData.append('careTypeId', careTypeId);
-            formData.append('notes', notes);
+            const jsonBlob = new Blob(
+                [JSON.stringify(careData)],
+                { type: 'application/json' }
+            );
+
+            formData.append('careData', jsonBlob); // Append JSON blob for care data
+
             if (image) {
-                formData.append('image', image); // Append the image file
+                formData.append('careImage', image); // Append the image file
             }
 
             console.log('Submitting care history data:', {
-                plantId,
-                careTypeId,
-                notes,
-                image: image ? image.name : null // Log image file name if present
+                careData: JSON.stringify(careData), // Log careData as JSON
+                careImage: image ? image.name : null // Log image file name if present
             });
 
             const response = await fetch(`${SERVER_ADDRESS}/api/create_care_history`, {
@@ -491,7 +499,7 @@ $(document).ready(async function () {
             imageRow.classList.add('image-row');
             imageRow.innerHTML = `
                 <td colspan="2">
-                    <img src="${url}" style="max-width: 120px; height: auto;" alt="Plant Image">
+                    <img src="${url}" style="max-width: 350px; height: auto;" alt="Plant Image">
                 </td>
             `;
             parentRow.insertAdjacentElement('afterend', imageRow);
@@ -509,7 +517,7 @@ $(document).ready(async function () {
             imageRow.classList.add('image-row');
             imageRow.innerHTML = `
                 <td colspan="6">
-                    <img src="${url}" style="max-width: 300px; height: auto;" alt="Care History Image">
+                    <img src="${url}" style="max-width: 350px; height: auto;" alt="Care History Image">
                 </td>
             `;
             parentRow.insertAdjacentElement('afterend', imageRow);
