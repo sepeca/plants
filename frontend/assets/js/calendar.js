@@ -164,27 +164,42 @@ $(document).ready(async function () {
     // Function to display the modal with new tasks
     function showNewTasksModal(newTasks, token) {
         const modalHtml = `
-            <div id="new-tasks-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000;">
-                <h1 style="color: red;">There are ${newTasks.length} new tasks:</h1>
-                <ul style="list-style: none; padding: 0; text-align: left;">
-                    ${newTasks.map(task => `
-                        <li>
-                            <strong>${task.plantName}</strong> - ${task.taskDate.split('T')[0]}<br>
-                            ${task.taskDescription || 'No description available.'}
-                        </li>
-                    `).join('')}
-                </ul>
-                <button id="notify-tasks-btn" style="margin-top: 20px; padding: 10px 20px; background: green; color: white; border: none; cursor: pointer;">Acknowledge</button>
+            <div id="new-tasks-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000;">
+                <h1 style="font-size: 4em; color: red; margin-top: 20px;">
+                    There are <span style="color: yellow; text-decoration: underline;">${newTasks.length}</span> new tasks:
+                </h1>
+                <div style="overflow-y: auto; max-height: 60%; width: 80%; padding: 10px; background: rgba(0, 0, 0, 0.8); border-radius: 10px;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 2em; color: white;">
+                        <thead>
+                            <tr>
+                                <th style="width: 20%; padding: 10px;">Plant Name</th>
+                                <th style="width: 10%; padding: 10px;">Task Date</th>
+                                <th style="width: 40%; padding: 10px;">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${newTasks.map(task => `
+                                <tr style="background-color: black;">
+                                    <td style="width: 20%; padding: 10px; word-wrap: break-word; white-space: normal;">${task.plantName}</td>
+                                    <td style="width: 10%; padding: 10px; word-wrap: break-word; white-space: normal;">${task.taskDate.split('T')[0]}</td>
+                                    <td style="width: 40%; padding: 10px; word-wrap: break-word; white-space: normal;">${task.taskDescription || 'No description available.'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <button id="notify-tasks-btn" style="margin-top: 20px; padding: 30px 20px; background: green; color: white; border: none; cursor: pointer; font-size: 1.5em;">Acknowledged</button>
             </div>
         `;
 
-        $('body').append(modalHtml);
+        $('body').append(modalHtml); // Append modal to body
 
         $('#notify-tasks-btn').on('click', async function () {
             const taskIds = newTasks.map(task => task.id);
 
             try {
-                const response = await fetch(`${SERVER_ADDRESS}/api/notify_task`, {
+                console.log('Task IDs to notify:', taskIds); // Debug log for task IDs
+                const response = await fetch(`${SERVER_ADDRESS}/api/notify_tasks`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -194,7 +209,7 @@ $(document).ready(async function () {
                 });
 
                 if (response.ok) {
-                    $('#new-tasks-modal').remove(); // Hide the modal on success
+                    $('#new-tasks-modal').remove(); // Remove modal on success
                 } else {
                     console.error('Failed to notify tasks. Please try again.');
                 }
