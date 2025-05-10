@@ -70,25 +70,12 @@ $(document).ready(async function () {
     async function submitPlant(plantName, species, locationName, categoryName, humidity, lightRequirements, water, temperatureRange, images) {
         try {
             if (images.length > 3) {
-                showNotification('You can upload a maximum of 3 images.',false);
+                showNotification('You can upload a maximum of 3 images.', false);
                 return;
             }
 
             const formData = new FormData();
-            formData.append('plantName', plantName);
-            formData.append('species', species);
-            formData.append('locationName', locationName);
-            formData.append('categoryName', categoryName);
-            formData.append('humidity', humidity);
-            formData.append('lightRequirements', lightRequirements);
-            formData.append('water', water);
-            formData.append('temperatureRange', temperatureRange);
-
-            images.forEach((image, index) => {
-                formData.append(`images[${index}]`, image); // Append each image file
-            });
-
-            console.log('Submitting plant data:', {
+            const plantData = {
                 plantName,
                 species,
                 locationName,
@@ -96,8 +83,23 @@ $(document).ready(async function () {
                 humidity,
                 lightRequirements,
                 water,
-                temperatureRange,
-                images: images.map(image => image.name) // Log image file names
+                temperatureRange
+            };
+
+            const jsonBlob = new Blob(
+                [JSON.stringify(plantData)],
+                { type: 'application/json' }
+            );
+
+            formData.append('plantData', jsonBlob); // Append JSON blob for plant data
+
+            images.forEach((image) => {
+                formData.append(`plantImages`, image); // Append each image file
+            });
+
+            console.log('Submitting plant data:', {
+                plantData,
+                plantImages: images.map(image => image.name) // Log image names for debugging
             });
 
             const response = await fetch(`${SERVER_ADDRESS}/api/add_plant`, {
