@@ -385,7 +385,7 @@ $(document).ready(async function () {
                                 <th>Date</th>
                                 <th>Type</th>
                                 <th class="notes-column">Notes</th> <!-- Add class for notes column -->
-                                <th>User</th>
+                                <th class="user-column" >User</th>
                                 <th>Image</th>
                                 <th>Action</th>
                             </tr>
