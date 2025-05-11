@@ -3,7 +3,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.*;
+
 @Entity
 @Table(name = "care_type")
 public class CareType {
