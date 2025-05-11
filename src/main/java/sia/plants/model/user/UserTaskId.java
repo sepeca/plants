@@ -1,5 +1,5 @@
 package sia.plants.model.user;
-import jakarta.persistence.*;
+
 
 import java.io.Serializable;
 import java.util.*;

@@ -1,10 +1,7 @@
 package sia.plants.DTO.plant;
 
-import jdk.jfr.Label;
 import jdk.jfr.Name;
 import lombok.Data;
-
-import java.util.List;
 import java.util.UUID;
 
 @Data

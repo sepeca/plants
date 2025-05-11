@@ -1,5 +1,8 @@
 package sia.plants.model.plant;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.*;
 
 @Entity
@@ -9,24 +12,11 @@ public class PlantCategory {
     @Column(name = "plant_categoryid")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer plantCategoryId;
+
+    @Setter
+    @Getter
     @Column(nullable = false)
     private String name;
-
-    public Integer getPlantCategoryId() {
-        return plantCategoryId;
-    }
-
-    public void setPlantCategoryId(Integer plantCategoryId) {
-        this.plantCategoryId = plantCategoryId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
 
 }

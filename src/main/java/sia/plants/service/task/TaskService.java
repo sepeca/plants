@@ -2,10 +2,8 @@ package sia.plants.service.task;
 
 import sia.plants.DTO.task.CreateTaskRequest;
 import sia.plants.DTO.task.FinishTasksRequest;
-import sia.plants.DTO.task.TaskResponse;
 import sia.plants.DTO.task.TaskWithUsersDTO;
-import sia.plants.entities.UserTaskView;
-import sia.plants.model.Task;
+
 
 import java.util.List;
 import java.util.UUID;

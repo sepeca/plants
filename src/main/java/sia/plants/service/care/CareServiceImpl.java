@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sia.plants.DTO.careHistory.CareHistoryDTO;
 import sia.plants.DTO.careHistory.CreateCareHistoryRequest;
-import sia.plants.DTO.careHistory.UpdateCareHistoryRequest;
 import sia.plants.exception.NotFoundException;
 import sia.plants.model.CareHistory;
 import sia.plants.model.CareType;
@@ -13,7 +12,6 @@ import sia.plants.model.plant.Plant;
 import sia.plants.model.user.User;
 import sia.plants.repository.CareHistoryRepository;
 import sia.plants.repository.plant.PlantRepository;
-import sia.plants.security.JwtService;
 import sia.plants.service.imageHandler.ImageHandler;
 
 import java.sql.Timestamp;
@@ -78,23 +76,7 @@ public class CareServiceImpl implements CareService{
                     return dto;
                 }).toList();
     }
-    @Override
-    public List<CareHistoryDTO> getCareHistoryByUserId(UUID userId){
-        return careHistoryRepository.findAllByUser_UserId(userId).stream()
-                .map(ch -> {
-                    CareHistoryDTO dto = new CareHistoryDTO();
-                    dto.setCareHistoryId(ch.getCareHistoryId());
-                    dto.setCareDate(ch.getCareDate());
-                    dto.setImageUrl(ch.getImageUrl());
-                    dto.setNotes(ch.getNotes());
 
-                    dto.setCareTypeName(ch.getCareType().getName());
-
-                    dto.setUserEmail(ch.getUser().getEmail());
-                    dto.setUserName(ch.getUser().getName());
-                    return dto;
-                }).toList();
-    }
     @Override
     @Transactional
     public void deleteCareHistory(Integer careHistoryId, UUID userId, boolean isAdmin) {

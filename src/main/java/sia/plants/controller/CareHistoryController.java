@@ -7,14 +7,9 @@ import sia.plants.DTO.ApiResponse;
 import sia.plants.DTO.careHistory.CareHistoryDTO;
 import sia.plants.DTO.careHistory.CreateCareHistoryRequest;
 import sia.plants.DTO.careHistory.DeleteCareHistoryRequest;
-import sia.plants.DTO.careHistory.UpdateCareHistoryRequest;
-import sia.plants.DTO.plant.CreatePlantRequest;
-import sia.plants.exception.NotFoundException;
-import sia.plants.model.CareHistory;
 import sia.plants.model.CareType;
 import sia.plants.model.plant.Plant;
 import sia.plants.model.user.User;
-import sia.plants.repository.CareHistoryRepository;
 import sia.plants.repository.CareTypeRepository;
 import sia.plants.repository.plant.PlantRepository;
 import sia.plants.repository.user.UserRepository;
@@ -101,15 +96,6 @@ public class CareHistoryController {
             throw new RuntimeException("Access denied: Plant does not belong to your organization");
         }
         List<CareHistoryDTO> dto = careService.getCareHistoryByPlantId(id);
-        return ResponseEntity.ok(dto);
-    }
-    @GetMapping("/care_history_my")
-    public ResponseEntity<?> getPlantDetail(
-
-            @RequestHeader("Authorization") String authHeader){
-        String token = jwtService.extractToken(authHeader);
-        UUID uuid = UUID.fromString(jwtService.extractUserId(token));
-        List<CareHistoryDTO> dto = careService.getCareHistoryByUserId(uuid);
         return ResponseEntity.ok(dto);
     }
     @DeleteMapping("/care_history_delete")

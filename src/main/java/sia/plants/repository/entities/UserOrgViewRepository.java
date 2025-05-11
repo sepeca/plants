@@ -8,6 +8,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface UserOrgViewRepository extends JpaRepository<UserOrgView, UUID> {
-    List<UserOrgView> findByOrganizationId(UUID organizationId);
+
     Optional<UserOrgView> findByUserId(UUID userId);
 }

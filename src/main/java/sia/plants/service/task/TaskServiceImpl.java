@@ -4,7 +4,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestHeader;
 import sia.plants.DTO.task.*;
 import sia.plants.entities.UserTaskView;
 import sia.plants.model.Task;
@@ -22,7 +21,6 @@ import sia.plants.service.user.UserService;
 
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class TaskServiceImpl implements TaskService {

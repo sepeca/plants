@@ -14,28 +14,8 @@ public class TaskPlantDTO {
         this.species = species;
     }
 
-    public Integer getPlantId() {
-        return plantId;
-    }
 
-    public void setPlantId(Integer plantId) {
-        this.plantId = plantId;
-    }
 
-    public String getName() {
-        return name;
-    }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getSpecies() {
-        return species;
-    }
-
-    public void setSpecies(String species) {
-        this.species = species;
-    }
 
 }

@@ -21,7 +21,6 @@ public class AuthController {
 
     private final JwtService jwtService;
     private final UserService userService;
-    private final UserRepository userRepository;
     private final OrganizationRepository organizationRepository;
     public AuthController(JwtService jwtService, UserService userService,
                           OrganizationRepository organizationRepository,
@@ -29,7 +28,6 @@ public class AuthController {
         this.jwtService = jwtService;
         this.userService = userService;
         this.organizationRepository = organizationRepository;
-        this.userRepository = userRepository;
     }
 
     @PostMapping("/login")
@@ -46,8 +44,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse> logout(HttpServletResponse response,
-                                              @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<ApiResponse> logout(@RequestHeader("Authorization") String authHeader) {
         String token = jwtService.extractToken(authHeader);
         jwtService.blacklistToken(token);
         return  ResponseEntity.ok(ApiResponse.success());

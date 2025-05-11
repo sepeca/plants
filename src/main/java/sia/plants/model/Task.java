@@ -1,5 +1,6 @@
 package sia.plants.model;
 import jakarta.persistence.*;
+import lombok.Setter;
 import sia.plants.model.plant.Plant;
 
 import java.sql.Timestamp;
@@ -13,18 +14,22 @@ public class Task {
     @Column(name = "taskid")
     private Integer taskId;
 
+    @Setter
     @Column(name = "completed", nullable = false)
     private Boolean completed = false;
 
+    @Setter
     @Column(name = "due_date", nullable = false)
     private Timestamp dueDate;
 
+    @Setter
     @Column(name = "text")
     private String text;
 
 
     @Column(name = "care_taker")
     private String careTaker;
+    @Setter
     @ManyToOne
     @JoinColumn(name = "plantid", nullable = false)
     private Plant plant;
@@ -33,47 +38,29 @@ public class Task {
         return taskId;
     }
 
-    public void setTaskId(Integer taskId) {
-        this.taskId = taskId;
-    }
+
 
     public Boolean getCompleted() {
         return completed;
-    }
-
-    public void setCompleted(Boolean completed) {
-        this.completed = completed;
     }
 
     public Timestamp getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(Timestamp dueDate) {
-        this.dueDate = dueDate;
-    }
-
     public String getText() {
         return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
     }
 
     public Plant getPlant() {
         return plant;
     }
 
-    public void setPlant(Plant plant) {
-        this.plant = plant;
-    }
+
     public String getCareTaker() {
         return careTaker;
     }
 
-    public void setCareTaker(String careTaker) {
-        this.careTaker = careTaker;
-    }
+
 
 }

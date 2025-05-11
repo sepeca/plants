@@ -2,8 +2,6 @@ package sia.plants.service.care;
 
 import sia.plants.DTO.careHistory.CareHistoryDTO;
 import sia.plants.DTO.careHistory.CreateCareHistoryRequest;
-import sia.plants.DTO.careHistory.UpdateCareHistoryRequest;
-import sia.plants.model.CareHistory;
 import sia.plants.model.CareType;
 import sia.plants.model.plant.Plant;
 import sia.plants.model.user.User;
@@ -19,5 +17,5 @@ public interface CareService {
                            String imageUrl);
     void deleteCareHistory(Integer careHistoryId, UUID deleterId, boolean isAdmin);
     List<CareHistoryDTO> getCareHistoryByPlantId(Integer plantId);
-    List<CareHistoryDTO> getCareHistoryByUserId(UUID userId);
+
 }

@@ -15,7 +15,4 @@ public class FinishTasksRequest {
         return taskIds;
     }
 
-    public void setTaskIds(List<Integer> taskIds) {
-        this.taskIds = taskIds;
-    }
 }

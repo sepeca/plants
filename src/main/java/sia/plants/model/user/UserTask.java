@@ -1,5 +1,6 @@
 package sia.plants.model.user;
 import jakarta.persistence.*;
+import lombok.Getter;
 import sia.plants.model.Task;
 
 
@@ -8,11 +9,13 @@ import sia.plants.model.Task;
 @IdClass(UserTaskId.class)
 public class UserTask {
 
+    @Getter
     @Id
     @ManyToOne
     @JoinColumn(name = "taskid", nullable = false)
     private Task task;
 
+    @Getter
     @Id
     @ManyToOne
     @JoinColumn(name = "userid", nullable = false)
@@ -21,25 +24,15 @@ public class UserTask {
     @Column(name = "notified", nullable = false)
     private Boolean notified;
 
-    public Task getTask() {
-        return task;
-    }
-
     public void setTask(Task task) {
         this.task = task;
-    }
-
-    public User getUser() {
-        return user;
     }
 
     public void setUser(User user) {
         this.user = user;
     }
 
-    public Boolean getNotified() {
-        return notified;
-    }
+
 
     public void setNotified(Boolean notified) {
         this.notified = notified;
