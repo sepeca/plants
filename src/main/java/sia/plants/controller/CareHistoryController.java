@@ -2,11 +2,13 @@ package sia.plants.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import sia.plants.DTO.ApiResponse;
 import sia.plants.DTO.careHistory.CareHistoryDTO;
 import sia.plants.DTO.careHistory.CreateCareHistoryRequest;
 import sia.plants.DTO.careHistory.DeleteCareHistoryRequest;
 import sia.plants.DTO.careHistory.UpdateCareHistoryRequest;
+import sia.plants.DTO.plant.CreatePlantRequest;
 import sia.plants.exception.NotFoundException;
 import sia.plants.model.CareHistory;
 import sia.plants.model.CareType;
@@ -18,6 +20,7 @@ import sia.plants.repository.plant.PlantRepository;
 import sia.plants.repository.user.UserRepository;
 import sia.plants.security.JwtService;
 import sia.plants.service.care.CareService;
+import sia.plants.service.imageHandler.ImageHandler;
 
 import java.util.List;
 import java.util.Map;
@@ -31,13 +34,16 @@ public class CareHistoryController {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final CareService careService;
+    private final ImageHandler imageHandler;
 
     public CareHistoryController(PlantRepository plantRepository,
                                  CareTypeRepository careTypeRepository,
                                  UserRepository userRepository,
                                  JwtService jwtService,
+                                 ImageHandler imageHandler,
                                  CareService careService) {
         this.plantRepository = plantRepository;
+        this.imageHandler = imageHandler;
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.careService = careService;
@@ -50,12 +56,14 @@ public class CareHistoryController {
     }
     @PostMapping("/create_care_history")
     public ResponseEntity<?> createCareHistory(
-            @RequestBody CreateCareHistoryRequest request,
+            @RequestPart("careData") CreateCareHistoryRequest data,
+            @RequestPart(value = "careImage", required = false) MultipartFile image,
             @RequestHeader("Authorization") String authHeader){
+
         String token = jwtService.extractToken(authHeader);
-        Plant plant = plantRepository.findById(request.getPlantId())
+        Plant plant = plantRepository.findById(data.getPlantId())
                 .orElseThrow(() -> new IllegalArgumentException("Plant not found"));
-        UUID userId = request.getUserId();
+        UUID userId = data.getUserId();
 
 
         if(userId == null) {
@@ -67,36 +75,18 @@ public class CareHistoryController {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        CareType careType = careTypeRepository.findById(request.getCareTypeId())
+        CareType careType = careTypeRepository.findById(data.getCareTypeId())
                 .orElseThrow(() -> new IllegalArgumentException("Care type not found"));
+        String imageUrl = imageHandler.imageToUrl(image);
 
         try {
-            careService.createCareHistory(request, plant, user, careType);
+            careService.createCareHistory(data, plant, user, careType, imageUrl);
             return ResponseEntity.ok("Care history entry created");
         } catch (Exception e) {
             return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
         }
     }
-    @PutMapping("/update_care_history/")
-    public ResponseEntity<?> updateCareHistory(
 
-            @RequestBody UpdateCareHistoryRequest request,
-            @RequestHeader("Authorization") String authHeader){
-        String token = jwtService.extractToken(authHeader);
-        int id = request.getCareHistoryId();
-        try {
-            jwtService.validate(token);
-            UUID currentUserId = UUID.fromString(jwtService.extractUserId(token));
-            boolean isAdmin = jwtService.extractIsAdmin(token);
-
-            CareHistory updated = careService.updateCareHistory(id, request, currentUserId, isAdmin);
-            return ResponseEntity.ok(updated);
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(403).body(Map.of("error", e.getMessage()));
-        }
-    }
     @GetMapping("/care_history_by_plant/{id}")
     public ResponseEntity<?> getPlantDetail(
             @PathVariable Integer id,
@@ -128,6 +118,9 @@ public class CareHistoryController {
             @RequestHeader("Authorization") String authHeader){
         String token = jwtService.extractToken(authHeader);
         UUID deleterId = UUID.fromString(jwtService.extractUserId(token));
+        boolean isAdmin = jwtService.extractIsAdmin(token);
+        careService.deleteCareHistory(request.getCareHistoryId(), deleterId, isAdmin);
+
         return ResponseEntity.ok(ApiResponse.success());
     }
 }

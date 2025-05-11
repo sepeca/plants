@@ -15,8 +15,9 @@ public interface CareService {
     void createCareHistory(CreateCareHistoryRequest request,
                            Plant plant,
                            User user,
-                           CareType careType);
+                           CareType careType,
+                           String imageUrl);
+    void deleteCareHistory(Integer careHistoryId, UUID deleterId, boolean isAdmin);
     List<CareHistoryDTO> getCareHistoryByPlantId(Integer plantId);
     List<CareHistoryDTO> getCareHistoryByUserId(UUID userId);
-    CareHistory updateCareHistory(Integer id, UpdateCareHistoryRequest request, UUID currentUserId, boolean isAdmin);
 }

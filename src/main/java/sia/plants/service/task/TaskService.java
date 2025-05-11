@@ -16,4 +16,5 @@ public interface TaskService {
     List<TaskWithUsersDTO>  getMyTasks(UUID userId, UUID orgId);
     void finishTasksNotAdmin(UUID userId, UUID orgId, FinishTasksRequest request);
     void finishTasksAdmin(UUID userId, UUID orgId, FinishTasksRequest request);
+    void notifyTasks(UUID userId, List<Integer> taskIds);
 }

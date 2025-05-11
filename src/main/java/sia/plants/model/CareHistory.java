@@ -9,6 +9,7 @@ import java.util.*;
 @Table(name = "care_history")
 public class CareHistory {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "care_historyid")
@@ -34,6 +35,9 @@ public class CareHistory {
     @ManyToOne
     @JoinColumn(name = "userid", nullable = false)
     private User user;
+
+    @Column(name = "user_name")
+    private String userName;
 
     public Integer getCareHistoryId() {
         return careHistoryId;
@@ -89,5 +93,12 @@ public class CareHistory {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public void setUserName(String name) {
+        this.userName = name;
+    }
+    public String getUserName(){
+        return userName;
     }
 }

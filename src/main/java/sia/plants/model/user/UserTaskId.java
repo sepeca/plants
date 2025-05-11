@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.*;
 public class UserTaskId implements Serializable {
-    private Integer task;
-    private UUID user;
+    public Integer task;
+    public UUID user;
 
 
     @Override

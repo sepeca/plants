@@ -1,5 +1,7 @@
 package sia.plants.service.task;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -9,6 +11,7 @@ import sia.plants.model.Task;
 import sia.plants.model.plant.Plant;
 import sia.plants.model.user.User;
 import sia.plants.model.user.UserTask;
+import sia.plants.model.user.UserTaskId;
 import sia.plants.repository.TaskRepository;
 import sia.plants.repository.entities.UserTaskViewRepository;
 import sia.plants.repository.plant.PlantRepository;
@@ -23,6 +26,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class TaskServiceImpl implements TaskService {
+    @PersistenceContext
+    private EntityManager entityManager;
 
     private final TaskRepository taskRepository;
     private final PlantRepository plantRepository;
@@ -110,6 +115,8 @@ public class TaskServiceImpl implements TaskService {
         dto.setPlantSpecies(task.getPlantSpecies());
         dto.setAssignedUsers(new ArrayList<>());
         dto.setLocationName(task.getLocationName());
+        dto.setNotified(task.isNotified());
+
         return dto;
     }
     private TaskWithUsersDTO createTaskWithUsersDTO(Task task){
@@ -119,11 +126,12 @@ public class TaskServiceImpl implements TaskService {
         dto.setCompleted(task.getCompleted());
         dto.setDueDate(task.getDueDate());
         dto.setCareTaker(task.getCareTaker());
+
         Plant plant = task.getPlant();
         dto.setPlantId(plant.getPlantId());
         dto.setPlantName(plant.getName());
         dto.setPlantSpecies(plant.getSpecies());
-
+        dto.setNotified(true);
         dto.setLocationName(plant.getLocation().getName());
         return dto;
     }
@@ -228,6 +236,25 @@ public class TaskServiceImpl implements TaskService {
 
         tasks.forEach(task -> task.setCompleted(true));
         taskRepository.saveAll(tasks);
+    }
+    @Override
+    @Transactional
+    public void notifyTasks(UUID userId, List<Integer> taskIds) {
+
+        List<UserTaskId> userTaskIds = taskIds.stream()
+                .map(taskId -> {
+                    UserTaskId id = new UserTaskId();
+                    id.task = taskId;
+                    id.user = userId;
+                    return id;
+                })
+                .toList();
+        List<UserTask> userTasks = userTaskRepository.findAllById(userTaskIds);
+        for (UserTask ut : userTasks) {
+            ut.setNotified(true);
+        }
+        userTaskRepository.saveAll(userTasks);
+
     }
 }
 

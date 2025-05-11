@@ -15,7 +15,6 @@ public class UserRepositoryCustom {
     }
 
     public void deleteUserWithCheck(UUID userId) {
-        String sql = "CALL delete_user_with_check(?)";
-        jdbcTemplate.update(sql, userId);
+        jdbcTemplate.update("CALL public.delete_user_with_check(?)", userId);
     }
 }

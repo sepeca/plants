@@ -19,6 +19,7 @@ public class TaskWithUsersDTO {
     private String plantName;
     private String plantSpecies;
     public  String careTaker;
+    private boolean notified;
 
     private List<String> assignedUsers;
     public Integer getTaskId() {

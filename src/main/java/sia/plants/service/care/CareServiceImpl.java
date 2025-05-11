@@ -1,5 +1,6 @@
 package sia.plants.service.care;
 
+import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sia.plants.DTO.careHistory.CareHistoryDTO;
@@ -13,6 +14,7 @@ import sia.plants.model.user.User;
 import sia.plants.repository.CareHistoryRepository;
 import sia.plants.repository.plant.PlantRepository;
 import sia.plants.security.JwtService;
+import sia.plants.service.imageHandler.ImageHandler;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -22,12 +24,17 @@ import java.util.UUID;
 public class CareServiceImpl implements CareService{
     private final PlantRepository plantRepository;
     private final CareHistoryRepository careHistoryRepository;
+    private final ImageHandler imageHandler;
+    private final EntityManager entityManager;
 
     public CareServiceImpl(PlantRepository plantRepository,
-                       CareHistoryRepository careHistoryRepository,
-                       JwtService jwtService) {
+                           CareHistoryRepository careHistoryRepository,
+                           ImageHandler imageHandler,
+                           EntityManager entityManager) {
         this.plantRepository = plantRepository;
         this.careHistoryRepository = careHistoryRepository;
+        this.imageHandler = imageHandler;
+        this.entityManager = entityManager;
 
     }
     @Override
@@ -35,41 +42,21 @@ public class CareServiceImpl implements CareService{
     public void createCareHistory(CreateCareHistoryRequest request,
                                   Plant plant,
                                   User user,
-                                  CareType careType) {
+                                  CareType careType,
+                                  String imageUrl) {
 
         CareHistory careHistory = new CareHistory();
         careHistory.setCareDate(new Timestamp(System.currentTimeMillis()));
-        careHistory.setImageUrl(request.getImageUrl());
+        careHistory.setImageUrl(imageUrl);
         careHistory.setNotes(request.getNotes());
         careHistory.setPlant(plant);
         careHistory.setUser(user);
+        careHistory.setUserName(user.getName());
         careHistory.setCareType(careType);
 
-        careHistoryRepository.save(careHistory); // Триггер проверит принадлежность к организации
+        careHistoryRepository.save(careHistory);
     }
-    @Override
-    public CareHistory updateCareHistory(Integer id, UpdateCareHistoryRequest request, UUID currentUserId, boolean isAdmin) {
-        CareHistory history = careHistoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Care history not found"));
 
-
-        UUID authorId = history.getUser().getUserId();
-        if (!authorId.equals(currentUserId) && !isAdmin) {
-            throw new IllegalArgumentException("You are not authorized to update this care history");
-        }
-
-        String imageUrl = request.getImageUrl();
-        if (imageUrl != null) {
-            history.setImageUrl(request.getImageUrl());
-        }
-        String notes = request.getNotes();
-        if (notes != null) {
-            history.setNotes(request.getNotes());
-        }
-
-
-        return careHistoryRepository.save(history);
-    }
     @Override
     public List<CareHistoryDTO> getCareHistoryByPlantId(Integer plantId) {
 
@@ -82,9 +69,12 @@ public class CareServiceImpl implements CareService{
                     dto.setNotes(ch.getNotes());
 
                     dto.setCareTypeName(ch.getCareType().getName());
-
+                    if(ch.getUser() != null){
                     dto.setUserEmail(ch.getUser().getEmail());
-                    dto.setUserName(ch.getUser().getName());
+                    dto.setUserName(ch.getUser().getName());}
+                    else{
+                        dto.setUserName(ch.getUserName());
+                    }
                     return dto;
                 }).toList();
     }
@@ -104,5 +94,18 @@ public class CareServiceImpl implements CareService{
                     dto.setUserName(ch.getUser().getName());
                     return dto;
                 }).toList();
+    }
+    @Override
+    @Transactional
+    public void deleteCareHistory(Integer careHistoryId, UUID userId, boolean isAdmin) {
+        CareHistory history = careHistoryRepository.findById(careHistoryId)
+                .orElseThrow(() -> new NotFoundException("Care history not found"));
+        if(!isAdmin && history.getUser().getUserId() != userId){
+            throw new RuntimeException("You are not allowed to delete this careHistory");
+        }
+
+        imageHandler.deleteFileFromDisk(history.getImageUrl());
+
+        careHistoryRepository.deleteDirectly(history.getCareHistoryId());
     }
 }

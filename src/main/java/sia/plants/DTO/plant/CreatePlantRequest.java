@@ -22,5 +22,5 @@ public class CreatePlantRequest {
     private String water;
     private String temperatureRange;
 
-    private List<String> imageUrls;
+
 }

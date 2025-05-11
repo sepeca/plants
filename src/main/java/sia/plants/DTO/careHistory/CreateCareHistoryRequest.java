@@ -9,7 +9,7 @@ import java.util.UUID;
 @Data
 public class CreateCareHistoryRequest {
 
-    private String imageUrl;
+
     private String notes;
 
     private Integer plantId;

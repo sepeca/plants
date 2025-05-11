@@ -8,7 +8,7 @@ import java.util.UUID;
 @Data
 public class CreateUserRequest {
     private String email;
-    @JsonProperty("username")
+    @JsonProperty("name")
     private String name;
     private String password;
 

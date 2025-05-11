@@ -149,9 +149,10 @@ public class AuthController {
                                                   @RequestBody DeleteUserRequest request){
         String token = jwtService.extractToken(authHeader);
         Boolean isAdmin = jwtService.extractIsAdmin(token);
+        UUID selfId = UUID.fromString(jwtService.extractUserId(token));
         UUID userId = UUID.fromString(request.getUserId());
-        System.out.println(userId);
-        if(!isAdmin){
+
+        if(!isAdmin && userId != selfId){
             throw new RuntimeException("Only Admins can delete users");
         }
         userService.deleteUser(userId);

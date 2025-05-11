@@ -69,5 +69,13 @@ public class TaskController {
         return ResponseEntity.ok(ApiResponse.success());
 
     }
-
+    @PutMapping("/notify_tasks")
+    public  ResponseEntity<ApiResponse> notifyTasks(@RequestHeader("Authorization") String authHeader,
+                                                    @RequestBody FinishTasksRequest request
+                                                     ){
+        String token = jwtService.extractToken(authHeader);
+        UUID userId = UUID.fromString(jwtService.extractUserId(token));
+        taskService.notifyTasks(userId, request.getTaskIds());
+        return ResponseEntity.ok(ApiResponse.success());
+    }
 }
